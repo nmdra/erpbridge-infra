@@ -91,8 +91,7 @@ bridgectl --context erpbridge-hq api register \
   --url '<mockerp-url>' \
   --module demo \
   --description 'MockERP experiment API' \
-  --credential-ref ERP_PRIMARY_KEY \
-  --credential-source env
+  --credential-ref ERP_PRIMARY_KEY
 ```
 
 The first deployment leaves `ERP_BASE_URL` unset. This avoids an unverified

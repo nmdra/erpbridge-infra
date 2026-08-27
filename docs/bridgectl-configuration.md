@@ -56,8 +56,7 @@ bridgectl --context erpbridge-hq api register \
   --url "$MOCKERP_URL" \
   --module demo \
   --description 'MockERP experiment API' \
-  --credential-ref ERP_PRIMARY_KEY \
-  --credential-source env
+  --credential-ref ERP_PRIMARY_KEY
 ```
 
 `ERP_PRIMARY_KEY` is a logical reference.
