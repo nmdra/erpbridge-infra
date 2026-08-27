@@ -1,0 +1,27 @@
+name: Terraform static checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform format and validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8
+      - name: Check formatting
+        run: terraform fmt -check -recursive terraform
+      - name: Initialize without a backend
+        working-directory: terraform
+        run: terraform init -backend=false -input=false
+      - name: Validate
+        working-directory: terraform
+        run: terraform validate -no-color

@@ -1,0 +1,31 @@
+# Terraform state, plans, caches, and provider plugins
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.json
+crash.log
+crash.*.log
+
+# Commit .terraform.lock.hcl for reproducible provider selection.
+
+# Local variable files
+*.tfvars
+!*.tfvars.example
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.token
+secrets/
+
+# Local tooling
+.venv/
+__pycache__/
+*.py[cod]
