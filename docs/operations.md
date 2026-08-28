@@ -1,100 +1,237 @@
-# Demo operations
+# Operations runbook
 
-## Deployment
+## 1. Authenticate
 
-Run Terraform from the repository root:
+Log in to Azure and select the deployment subscription:
 
 ```bash
-terraform -chdir=terraform init
-terraform -chdir=terraform plan
-terraform -chdir=terraform apply
+az login
+az account set --subscription '<subscription-id>'
 ```
 
-Terraform creates these resources in `erpbridge-hq`:
+Set the Cloudflare API token in the current shell:
+
+```bash
+read -rsp 'Cloudflare API token: ' CLOUDFLARE_API_TOKEN
+export CLOUDFLARE_API_TOKEN
+echo
+```
+
+The token needs `Zone - DNS - Edit` and `Zone - Zone - Read` permissions for
+`nimendra.xyz`.
+Do not store the token in Terraform files.
+
+## 2. Apply the deployment
+
+Register the Azure resource providers once:
+
+```bash
+az provider register --namespace Microsoft.App
+az provider register --namespace Microsoft.OperationalInsights
+```
+
+Run the preflight:
+
+```bash
+make preflight
+```
+
+Review the plan:
+
+```bash
+make plan
+```
+
+Apply the plan:
+
+```bash
+make apply
+```
+
+The apply creates these resources in `erpbridge-hq`:
 
 - One Log Analytics workspace.
-- One Consumption Container Apps environment.
+- One Container Apps environment.
 - One ERPBridge Container App.
 - One MockERP Container App.
+- Two Cloudflare CNAME records.
+- Two `asuid` Cloudflare TXT records.
+- Two Azure managed certificates.
+- Two AzAPI certificate bindings.
 
-Terraform does not create a resource group, Redis instance, or persistent
-SQLite storage.
+Terraform does not create the resource group, Redis, or persistent SQLite
+storage.
 
-## Secret behavior
+Azure certificate issuance can take several minutes.
 
-The three secret variables are marked `sensitive`:
+## 3. Verify the deployment
 
-- `api_auth_token`
-- `erp_primary_key`
-- `mockerp_credentials_json`
-
-Terraform passes them to Container Apps as application secrets. Terraform state
-contains their values for this short-lived demo. Keep state files outside Git.
-
-Change `api_auth_token` and run `terraform apply`. Its hash changes the
-ERPBridge revision suffix, so a new revision receives the new token. Set the
-new value in `BRIDGE_API_TOKEN` before you use `bridgectl`.
-
-## Outputs
-
-Print the safe deployment summary:
+Run:
 
 ```bash
-terraform -chdir=terraform output
-terraform -chdir=terraform output -json deployment_summary
+make verify-deployment
 ```
 
-The outputs include HTTPS URLs, application names, ports, replica counts,
-resource group, location, HTTPS status, and Redis status. They do not include
-secret values.
+The command makes sure that:
 
-See [`bridgectl-configuration.md`](bridgectl-configuration.md) for the manual
-configuration procedure.
+- Both custom names resolve.
+- Both HTTPS health endpoints return success.
+- MockERP accepts the ERP credential.
+- ERPBridge exposes its control-plane routes.
+- The API probe route works.
+- MCP creates a session.
+- The read-only `list_warehouses` tool call succeeds.
 
-## Ingress
+Run only the server and CLI route check with:
 
-ERPBridge uses HTTPS ingress on `erpbridge_mcp_port`.
-Both ERPBridge probes use `/mcp/health` on that port.
+```bash
+make check-bridge-compatibility
+```
 
-MockERP uses HTTPS ingress on fixed port `8081`.
-Both MockERP probes use `/health` on that port.
+The check fails for unexpected control-plane errors.
+If the image does not contain the API probe route, the check reports the local
+`bridgectl` fallback used by the onboarding workflow.
 
-MockERP accepts traffic only from `mockerp_allowed_cidrs` and
-`mockerp_aca_internal_cidrs`. The first list is for Postman clients. The second
-list is for same-environment ERPBridge calls and defaults to `100.100.0.0/16`,
-the ACA overlay source range observed by this demo. Terraform labels the rules
-by source type and exports the effective sources as `mockerp_ingress_sources`.
+## 4. DNS and certificates
 
-After each apply, run `make verify-ingress`. It performs an authenticated MCP
-call through ERPBridge and fails if MockERP returns an ingress denial instead
-of JSON. The variable must contain at least one
-IPv4 CIDR and must not contain `0.0.0.0/0`.
+Cloudflare records use DNS-only mode.
+The app CNAME points directly to the Azure Container App FQDN.
+The `asuid.<hostname>` TXT record contains the Azure verification ID.
 
-## Manual onboarding
+Do not enable the Cloudflare proxy for these records.
+An intermediate CNAME can prevent Azure certificate issuance and renewal.
 
-Use the MockERP URL from Terraform output with Postman.
-Then register the API manually:
+If a zone has a CAA record, make sure that it permits DigiCert:
+
+```text
+0 issue digicert.com
+```
+
+The AzAPI binding uses:
+
+```text
+Microsoft.App/containerApps@2025-07-01
+```
+
+The binding body contains the hostname, managed certificate ID, and
+`SniEnabled` binding type.
+Do not add external custom domains to these apps without merging them into the
+AzAPI custom-domain list.
+
+## 5. Secret behavior
+
+The following values are sensitive Terraform inputs:
+
+- `api_auth_token`
+- `mockerp_credentials`
+
+Terraform passes them to Container Apps as application secrets.
+Terraform state contains their values for this demo.
+Use encrypted, access-controlled remote state for shared work.
+
+The MockERP credentials object must contain at least one complete token record.
+Terraform derives `ERP_PRIMARY_KEY` from the first credential as:
+
+```text
+token <api_key>:<api_secret>
+```
+
+Invalid credentials stop the plan before Azure creates a Container App revision.
+
+## 6. Output artifact
+
+Run:
+
+```bash
+make export-output
+```
+
+The command writes:
+
+```text
+artifacts/deployment-output.json
+```
+
+The file contains URLs, Azure fallback URLs, image references, ingress values,
+and the requested demo Terraform credentials.
+The file has mode `0600` and is ignored by Git.
+
+Do not print the file in a shared terminal.
+Do not put the Cloudflare API token in the file.
+
+## 7. Token lifecycle
+
+Set the ERPBridge admin credential for bridgectl:
 
 ```bash
 export BRIDGE_API_TOKEN="$TF_VAR_api_auth_token"
-bridgectl --context erpbridge-hq api register \
-  --name mockerp \
-  --url '<mockerp-url>' \
-  --module demo \
-  --description 'MockERP experiment API' \
-  --credential-ref ERP_PRIMARY_KEY
 ```
 
-`ERP_PRIMARY_KEY` is a logical reference. It is not the credential value.
-
-## Teardown
-
-Review the destroy plan before you remove the demo:
+Create a client token:
 
 ```bash
-terraform -chdir=terraform plan -destroy
-terraform -chdir=terraform destroy
-rm -f terraform/terraform.tfstate terraform/terraform.tfstate.backup
+./scripts/create-mcp-token.sh opencode
+```
+
+The script saves the one-time token in:
+
+```text
+artifacts/mcp-tokens.json
+```
+
+ERPBridge stores only a token hash.
+The raw token cannot be recovered after creation.
+
+## 8. OpenAPI onboarding
+
+Run:
+
+```bash
+make onboard-mockerp
+```
+
+The command registers MockERP, rewrites the OpenAPI server URL to the
+canonical MockERP URL, generates the approved tool set, validates each file,
+applies each tool, and confirms tool discovery.
+
+The default source is:
+
+```text
+../mockerp/openapi.yaml
+```
+
+Set `MOCKERP_OPENAPI_SPEC` to use another source.
+The old generated files with Azure default hostnames are not authoritative.
+
+## 9. Persistence boundary
+
+Both applications use `EmptyDir` storage.
+SQLite data can disappear during revision replacement or rescheduling.
+A destroy operation also removes the registry, tokens, and published tools.
+
+After a reset, run:
+
+```bash
+make apply
+make verify-deployment
+export BRIDGE_API_TOKEN="$TF_VAR_api_auth_token"
+make onboard-mockerp
+```
+
+Azure Files persistence is not enabled by this deployment.
+
+## 10. Teardown
+
+Create a destroy plan:
+
+```bash
+make destroy-plan
+```
+
+Destroy only the resources in the Terraform state:
+
+```bash
+make destroy
 ```
 
 Do not destroy `erpbridge-hq`.

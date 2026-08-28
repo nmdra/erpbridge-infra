@@ -3,6 +3,7 @@
 *.tfstate
 *.tfstate.*
 *.tfplan
+tfplan
 *.tfplan.json
 crash.log
 crash.*.log
@@ -16,6 +17,7 @@ crash.*.log
 *.auto.tfvars.json
 
 # Local secrets and credentials
+artifacts/
 .env
 .env.*
 !.env.example

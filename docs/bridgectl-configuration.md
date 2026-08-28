@@ -1,79 +1,137 @@
-# Build bridgectl configuration from Terraform output
+# Configure bridgectl from Terraform outputs
 
-Use this procedure after Terraform creates both Container Apps.
-The procedure reads only non-sensitive Terraform outputs.
+Run this procedure after Terraform applies the Container Apps and custom
+hostnames.
 
-## 1. Read the URLs
+## 1. Set the admin token
 
-Run these commands from the infrastructure repository:
+Use the Terraform admin token in the current shell:
 
 ```bash
-ERPBRIDGE_URL=$(terraform -chdir=terraform output -raw erpbridge_url)
-ERPBRIDGE_MCP_URL=$(terraform -chdir=terraform output -raw erpbridge_mcp_url)
-MOCKERP_URL=$(terraform -chdir=terraform output -raw mockerp_url)
+export BRIDGE_API_TOKEN="$TF_VAR_api_auth_token"
+```
+
+`BRIDGE_API_TOKEN` takes precedence over a token stored in a local context.
+Do not save this value in `~/.bridgectl/config.yaml`.
+
+## 2. Read the canonical URLs
+
+Run:
+
+```bash
+ERPBRIDGE_URL="$(terraform -chdir=terraform output -raw erpbridge_url)"
+ERPBRIDGE_MCP_URL="$(terraform -chdir=terraform output -raw erpbridge_mcp_url)"
+MOCKERP_URL="$(terraform -chdir=terraform output -raw mockerp_url)"
 
 printf 'ERPBridge: %s\n' "$ERPBRIDGE_URL"
 printf 'ERPBridge MCP: %s\n' "$ERPBRIDGE_MCP_URL"
 printf 'MockERP: %s\n' "$MOCKERP_URL"
 ```
 
-The output fields map to the `bridgectl` context fields as follows:
+When Cloudflare DNS is enabled, these values use:
 
-| Terraform output | Context field | Use |
-| --- | --- | --- |
-| `erpbridge_url` | `server` | ERPBridge control-plane URL |
-| `erpbridge_url` | `mcp-server` | ERPBridge control-plane root |
-| `erpbridge_mcp_url` | MCP clients | ERPBridge streamable MCP URL |
-| `mockerp_url` | `erp-base` | MockERP API base URL |
+```text
+erpbridge.nimendra.xyz
+erpbridge.nimendra.xyz/mcp/
+mockerp.nimendra.xyz
+```
 
-## 2. Use the URLs without writing a token
+The outputs use Azure hostnames only when custom domains are disabled.
 
-Set the URL overrides in the shell that runs `bridgectl`:
+## 3. Set shell URL overrides
+
+Run:
 
 ```bash
 export BRIDGE_SERVER="$ERPBRIDGE_URL"
 export BRIDGE_MCP_SERVER="$ERPBRIDGE_URL"
 export BRIDGE_ERP_BASE="$MOCKERP_URL"
-export BRIDGE_API_TOKEN="$TF_VAR_api_auth_token"
 ```
 
-Use an existing context with these overrides:
+Use the existing context:
 
 ```bash
-bridgectl --context erpbridge-hq api list
+BRIDGE_CONTEXT="${BRIDGE_CONTEXT:-erpbridge-demo}"
+bridgectl --context "$BRIDGE_CONTEXT" api list
 ```
 
-`BRIDGE_API_TOKEN` takes precedence over a token in the local context.
-Do not save this token in `~/.bridgectl/config.yaml`.
+The context name does not store the current URL overrides.
+The shell values take precedence for this command.
 
-## 3. Register MockERP
+## 4. Register MockERP
 
-Register the API with the public MockERP URL:
+Run:
 
 ```bash
-bridgectl --context erpbridge-hq api register \
+bridgectl --context "$BRIDGE_CONTEXT" api register \
+  --force \
   --name mockerp \
-  --url "$MOCKERP_URL" \
-  --module demo \
+  --url "${MOCKERP_URL%/}/api/resource/Asset%20Category" \
+  --method GET \
+  --module mockerp \
   --description 'MockERP experiment API' \
+  --auth-type api-key \
+  --auth-header Authorization \
   --credential-ref ERP_PRIMARY_KEY
 ```
 
-`ERP_PRIMARY_KEY` is a logical reference.
-It is not the ERP credential value.
+`ERP_PRIMARY_KEY` is a logical credential reference.
+It is not the credential value.
+ERPBridge resolves this reference inside the Container App.
+
+## 5. Generate and apply tools
+
+Run the deterministic onboarding workflow:
+
+```bash
+make onboard-mockerp
+```
+
+The workflow uses the local OpenAPI source, selects the approved 60 tools,
+validates each manifest, applies each tool, and confirms discovery.
+
+## 6. Verify the connection
+
+Run:
+
+```bash
+make verify-deployment
+```
+
+The command checks both health endpoints, the API probe route, MCP session
+creation, MockERP access, and the read-only `list_warehouses` tool.
+
+## 7. Create a client token
+
+Create a token for an MCP client:
+
+```bash
+./scripts/create-mcp-token.sh opencode
+```
+
+The script saves the token once in the ignored file:
+
+```text
+artifacts/mcp-tokens.json
+```
+
+ERPBridge does not return the raw token again.
+Use the saved file to configure the client, and do not commit it.
 
 ## Context field mapping
 
-- `server` sends control-plane requests to ERPBridge.
-- `mcp-server` is the ERPBridge host root used by CLI control-plane requests.
-- MCP clients use `erpbridge_mcp_url`, which ends in `/mcp/`.
-- `erp-base` supplies the default upstream ERP URL for API definitions.
-- `api-token` is optional and is not used by this procedure.
+| Value | Use |
+| --- | --- |
+| `erpbridge_url` | ERPBridge control-plane host |
+| `erpbridge_mcp_url` | Streamable MCP endpoint |
+| `mockerp_url` | MockERP API base URL |
+| `BRIDGE_API_TOKEN` | Temporary admin credential for `bridgectl` |
+| `ERP_PRIMARY_KEY` | Logical upstream credential reference |
 
 ## Security notes
 
-- The `demo_tokens` Terraform output deliberately contains the bridge token and upstream credential for this short-lived demo. Do not use that output in production.
-- The shell expands URLs from Terraform output at run time.
-- The shell keeps the bridge token outside the context file.
-- MockERP accepts requests only from the configured Postman and same-environment ACA CIDR ranges. Run `make verify-ingress` after apply.
-- Generate and apply tool manifests as separate reviewed actions.
+- Keep `BRIDGE_API_TOKEN` outside the bridgectl context file.
+- Do not print `demo_tokens` in a shared terminal.
+- Keep Terraform state and the output artifact protected.
+- Use DNS-only Cloudflare records for Azure certificate validation.
+- Run `make verify-deployment` after every new deployment or revision change.
