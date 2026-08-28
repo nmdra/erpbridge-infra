@@ -30,6 +30,7 @@ export TF_VAR_tenant_id='00000000-0000-0000-0000-000000000000'
 export TF_VAR_deployment_location='centralindia'
 export TF_VAR_erpbridge_image='ghcr.io/nmdra/erpbridge-server@sha256:<64-hex-digest>'
 export TF_VAR_mockerp_image='ghcr.io/nmdra/mockerp@sha256:<64-hex-digest>'
+# Use the public IPv4 CIDR for the local Postman client.
 export TF_VAR_mockerp_allowed_cidrs='["203.0.113.10/32"]'
 export TF_VAR_api_auth_token="$(openssl rand -hex 32)"
 read -r -s TF_VAR_erp_primary_key
@@ -52,8 +53,9 @@ terraform -chdir=terraform apply
 
 Terraform creates the Log Analytics workspace, Container Apps environment, and
 two HTTPS Container Apps. MockERP uses external ingress with the configured
-Postman CIDR allow-list. Both applications use one replica and ephemeral
-SQLite storage. Redis is not provisioned.
+Postman CIDR allow-list plus the dedicated ACA internal source CIDR variable.
+Both applications use one replica and ephemeral SQLite storage. Redis is not
+provisioned.
 
 ## Read the deployment output
 
@@ -65,8 +67,9 @@ terraform -chdir=terraform output -json deployment_summary
 ```
 
 The output includes the resource group, location, application names, HTTPS
-URLs, MCP URL, ports, replica counts, HTTPS status, and Redis status. It does
-not output secret values.
+URLs, MCP URL, ports, replica counts, HTTPS status, Redis status, and effective
+MockERP ingress sources. This demo also deliberately prints the bridge and
+upstream credential values in the `demo_tokens` output.
 
 See [`docs/bridgectl-configuration.md`](docs/bridgectl-configuration.md) for
 how to build a local `bridgectl` configuration from these outputs.
@@ -74,7 +77,9 @@ how to build a local `bridgectl` configuration from these outputs.
 ## Manual verification
 
 Use the printed URLs with Postman. MockERP API calls must come from the
-configured CIDR range and must use the seeded ERPNext credential.
+configured Postman CIDR and must use the seeded ERPNext credential. ERPBridge
+calls are admitted through `mockerp_aca_internal_cidrs`, which defaults to the
+Azure ACA overlay range observed by this demo.
 
 Set the same bridge token for `bridgectl`:
 
@@ -94,9 +99,25 @@ bridgectl --context erpbridge-hq api register \
   --credential-ref ERP_PRIMARY_KEY
 ```
 
-The first deployment leaves `ERP_BASE_URL` unset. This avoids an unverified
-ACA-to-MockERP source restriction. Run server-side probes only after you
-confirm that the MockERP CIDR rules admit the ACA caller.
+Use `make verify-ingress` after each apply. It performs an authenticated MCP
+call to `list-warehouses` and fails if the ACA-to-MockERP ingress path returns
+a denial instead of JSON.
+
+## Terraform operations
+
+Use the Makefile for the common workflow:
+
+```bash
+make preflight
+make plan
+make apply
+make summary
+make ingress-sources
+make verify-ingress
+```
+
+`make tokens` and `terraform output demo_tokens` print demo-only credentials to
+the terminal. Do not use either command in a production deployment.
 
 ## Change the bridge token
 

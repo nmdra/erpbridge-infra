@@ -271,7 +271,7 @@ variable "mockerp_https_only" {
 }
 
 variable "mockerp_allowed_cidrs" {
-  description = "Required IPv4 CIDR allow-list for local Postman ingress."
+  description = "Required IPv4 CIDR allow-list for external Postman clients."
   type        = list(string)
   validation {
     condition = (
@@ -284,6 +284,23 @@ variable "mockerp_allowed_cidrs" {
       ])
     )
     error_message = "mockerp_allowed_cidrs must be a non-empty unique IPv4 CIDR list without 0.0.0.0/0."
+  }
+}
+
+variable "mockerp_aca_internal_cidrs" {
+  description = "Azure Container Apps internal source CIDRs allowed to reach MockERP."
+  type        = list(string)
+  default     = ["100.100.0.0/16"]
+  validation {
+    condition = (
+      length(distinct(var.mockerp_aca_internal_cidrs)) == length(var.mockerp_aca_internal_cidrs) &&
+      alltrue([
+        for cidr in var.mockerp_aca_internal_cidrs :
+        can(regex("^[0-9]{1,3}(\\.[0-9]{1,3}){3}/[0-9]{1,2}$", cidr)) &&
+        can(cidrhost(cidr, 0)) && cidr != "0.0.0.0/0"
+      ])
+    )
+    error_message = "mockerp_aca_internal_cidrs must be unique valid IPv4 CIDRs without 0.0.0.0/0."
   }
 }
 

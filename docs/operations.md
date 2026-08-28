@@ -59,9 +59,16 @@ Both ERPBridge probes use `/mcp/health` on that port.
 MockERP uses HTTPS ingress on fixed port `8081`.
 Both MockERP probes use `/health` on that port.
 
-MockERP accepts traffic only from `mockerp_allowed_cidrs`.
-The variable must contain at least one IPv4 CIDR and must not contain
-`0.0.0.0/0`.
+MockERP accepts traffic only from `mockerp_allowed_cidrs` and
+`mockerp_aca_internal_cidrs`. The first list is for Postman clients. The second
+list is for same-environment ERPBridge calls and defaults to `100.100.0.0/16`,
+the ACA overlay source range observed by this demo. Terraform labels the rules
+by source type and exports the effective sources as `mockerp_ingress_sources`.
+
+After each apply, run `make verify-ingress`. It performs an authenticated MCP
+call through ERPBridge and fails if MockERP returns an ingress denial instead
+of JSON. The variable must contain at least one
+IPv4 CIDR and must not contain `0.0.0.0/0`.
 
 ## Manual onboarding
 

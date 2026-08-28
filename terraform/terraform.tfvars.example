@@ -9,8 +9,11 @@ deployment_location = "centralindia"
 erpbridge_image = "ghcr.io/nmdra/erpbridge-server@sha256:replace-with-reviewed-digest"
 mockerp_image   = "ghcr.io/nmdra/mockerp@sha256:replace-with-reviewed-digest"
 
-# Use the public IPv4 CIDR for the local Postman client.
+# Public IPv4 CIDR for the local Postman client.
 mockerp_allowed_cidrs = ["203.0.113.10/32"]
+
+# Same-environment Azure Container Apps source range used by this demo.
+mockerp_aca_internal_cidrs = ["100.100.0.0/16"]
 
 # Do not commit real values. Set these through TF_VAR_* instead.
 # api_auth_token          = ""

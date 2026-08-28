@@ -72,8 +72,8 @@ It is not the ERP credential value.
 
 ## Security notes
 
-- Terraform outputs do not contain API tokens or ERP credentials.
+- The `demo_tokens` Terraform output deliberately contains the bridge token and upstream credential for this short-lived demo. Do not use that output in production.
 - The shell expands URLs from Terraform output at run time.
 - The shell keeps the bridge token outside the context file.
-- MockERP accepts requests only from the configured Postman CIDR range.
+- MockERP accepts requests only from the configured Postman and same-environment ACA CIDR ranges. Run `make verify-ingress` after apply.
 - Generate and apply tool manifests as separate reviewed actions.

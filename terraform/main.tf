@@ -242,12 +242,12 @@ resource "azurerm_container_app" "mockerp" {
     }
 
     dynamic "ip_security_restriction" {
-      for_each = toset(var.mockerp_allowed_cidrs)
+      for_each = local.mockerp_ingress_sources
       content {
-        name             = "postman-${replace(replace(ip_security_restriction.value, "/", "-"), ".", "-")}"
+        name             = "${ip_security_restriction.value.name_prefix}-${replace(replace(ip_security_restriction.key, "/", "-"), ".", "-")}"
         action           = "Allow"
-        ip_address_range = ip_security_restriction.value
-        description      = "Approved local Postman IPv4 source range"
+        ip_address_range = ip_security_restriction.key
+        description      = ip_security_restriction.value.description
       }
     }
   }

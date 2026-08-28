@@ -15,11 +15,12 @@ output "deployment_summary" {
     }
 
     mockerp = {
-      name       = azurerm_container_app.mockerp.name
-      url        = local.mockerp_url
-      port       = var.mockerp_container_port
-      replicas   = 1
-      https_only = var.mockerp_https_only
+      name                  = azurerm_container_app.mockerp.name
+      url                   = local.mockerp_url
+      port                  = var.mockerp_container_port
+      replicas              = 1
+      https_only            = var.mockerp_https_only
+      ingress_allowed_cidrs = local.mockerp_ingress_allowed_cidrs
     }
   }
 }
@@ -37,6 +38,20 @@ output "erpbridge_mcp_url" {
 output "mockerp_url" {
   description = "Public HTTPS MockERP URL for local Postman."
   value       = local.mockerp_url
+}
+
+output "mockerp_ingress_sources" {
+  description = "Effective MockERP ingress CIDRs and their intended source types."
+  value       = local.mockerp_ingress_sources
+}
+
+output "demo_tokens" {
+  description = "DEMO ONLY: bridge and upstream credentials printed by terraform output."
+  value = {
+    api_auth_token  = nonsensitive(var.api_auth_token)
+    erp_primary_key = nonsensitive(var.erp_primary_key)
+  }
+  sensitive = false
 }
 
 output "resource_group_name" {
