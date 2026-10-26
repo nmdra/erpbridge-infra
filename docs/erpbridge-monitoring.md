@@ -1,20 +1,21 @@
 # ERPBridge monitoring operations
 
-> **Historical POC documentation.** The recorded deployments were torn down in
-> October 2026. Status, tool counts, approvals, and acceptance results below
-> describe dated work, not current services or permission to deploy again.
-> Check the versioned configuration and obtain fresh approval before cloud changes.
+> **Historical POC documentation.** The recorded deployments were deleted in
+> October 2026. The status, tool counts, approvals, and acceptance results below
+> describe past work. They do not describe current services or give permission
+> to deploy again. Before cloud changes, check the versioned configuration and
+> get new approval.
 
 ## Execution status
 
-Implementation and gated deployment were approved on 2026-10-18. The user approved:
+The user approved implementation and gated deployment on 2026-10-18. The approval covered:
 
 - Adoption of `VMI-ActionGroup-erpbridge-vm` and `VM Availability - erpbridge-vm`, with no other Terraform owner.
 - Reuse of the existing email receiver without publishing its name or address.
 - The scoped AzAPI provider addition, new monitoring resources, managed boot diagnostics, and monitoring-only installation through Azure Run Command.
 - Deployment of the planned fixed-size resources before the cost review. The earlier USD 10/month ceiling is now a reporting target, not a deployment gate or an Azure spending cap.
 
-No application restart, deliberate outage, synthetic rule mutation, or VM replacement is approved. Configuration and acceptance are separate. Do not report email delivery, KQL execution, or unattended backup observation as passed until measured.
+The approval does not cover an application restart, deliberate outage, synthetic rule mutation, or VM replacement. Configuration does not prove acceptance. Do not report email delivery, KQL execution, or unattended backup observation as passed until you measure them.
 
 ## Scope and ownership
 
@@ -22,7 +23,7 @@ The isolated `terraform-erpbridge/` root owns the dedicated ERPBridge VM and its
 
 Reuse the existing `AzureMonitorLinuxAgent` installation. Preserve the existing `msvmi-centralindia-erpbridge-vm` DCR and `VirtualMachineInsightsMetricsExtension` association. Their `Microsoft-OtelPerfMetrics` stream targets an Azure Monitor workspace, not a Log Analytics workspace. Do not import or alter these resources.
 
-Local state inventory found no existing owner for the action group or availability alert. The operator explicitly confirmed adoption. Protected Terraform state can contain receiver PII. Protect all state, saved plans, private variable files, and plan JSON with mode 0600 and a private parent directory. Never print a complete plan JSON or action-group response.
+The local state inventory found no existing owner for the action group or availability alert. The operator explicitly confirmed adoption. Protected Terraform state can contain receiver PII. Keep all state, saved plans, private variable files, and plan JSON at mode 0600 in a private parent directory. Never print a complete plan JSON or action-group response.
 
 ## Live preflight evidence
 
@@ -38,7 +39,7 @@ Read-only checks on 2026-10-18 found:
 | Percentage CPU | Average aggregation, Percent; recent sample 0.845% |
 | VmAvailabilityMetric | Average aggregation, Count; recent sample 1.0 |
 
-These metric samples were timestamped 2026-10-18T10:34:00Z. They are not current health claims. The original VM freeze remains unexplained. Low memory before the freeze does not establish an ERPBridge leak.
+These metric samples have the timestamp 2026-10-18T10:34:00Z. They do not show current health. The cause of the original VM freeze is still unknown. Low memory before the freeze does not prove an ERPBridge leak.
 
 ## Alert policy
 
@@ -51,9 +52,9 @@ These metric samples were timestamped 2026-10-18T10:34:00Z. They are not current
 - Disk: space/inodes above 85%, or less than 1 GiB free.
 - VM-scoped Resource Health and administrative restart/power-off/deallocate events provide context.
 
-The combined guest query seeds the expected VM and left-joins the latest event. Missing input must produce a failure row. Event time maps to `TimeGenerated`; delayed replay must not recover a no-data incident. One incident can remain active as reasons change. Use the current-reason query/workbook to inspect all reasons.
+The combined guest query seeds the expected VM and left-joins the latest event. Missing input must produce a failure row. Event time maps to `TimeGenerated`. Delayed replay must not recover a no-data incident. One incident can remain active while its reasons change. Use the current-reason query/workbook to inspect all reasons.
 
-The guest alert starts disabled only for commissioning. Enable it immediately after fresh ingestion and live query verification. Do not use this switch as a permanent mute. A missing guest sample indicates loss of observation, not proof that the VM is off.
+The guest alert starts disabled only for commissioning. Enable it immediately after you verify fresh ingestion and the live query. Do not use this switch to mute the alert permanently. A missing guest sample shows a loss of observation. It does not prove that the VM is off.
 
 ## Collector and installation
 
@@ -67,9 +68,9 @@ Use only the monitoring-specific installer:
 make erpbridge-install-monitoring CONFIRM=yes
 ```
 
-This selects the approved Azure Run Command channel. Do not use the runtime `bootstrap` command for monitoring. Bootstrap has a separate persisted-maintenance Caddyfile defect. Do not bypass the SSH-key access restriction.
+This command selects the approved Azure Run Command channel. Do not use the runtime `bootstrap` command for monitoring. Bootstrap has a separate persisted-maintenance Caddyfile defect. Do not bypass the SSH-key access restriction.
 
-The installer must preserve Caddy configuration hashes, workload units, database/runtime.env metadata, and backup wiring. It must not restart ERPBridge, reload Caddy, modify application settings, or reboot the guest. Repeat installation must remain safe.
+The installer must preserve Caddy configuration hashes, workload units, database/runtime.env metadata, and backup wiring. It must not restart ERPBridge, reload Caddy, modify application settings, or reboot the guest. It must remain safe to repeat the installation.
 
 ## Deployment procedure
 
@@ -82,7 +83,7 @@ The installer must preserve Caddy configuration hashes, workload units, database
 7. Enable the combined guest alert through a second reviewed plan after ingestion is proven.
 8. Test the action group and obtain recipient confirmation. API success alone does not prove delivery. Obtain separate approval before synthetic rule tests, deliberate outages, or restarts.
 
-Actual fired/resolved rule emails, action-group delivery tests, offline predicates, and live KQL fixture results are distinct evidence. Record them separately.
+Actual fired/resolved rule emails, action-group delivery tests, offline predicates, and live KQL fixture results provide different evidence. Record them separately.
 
 ## Cost review after deployment
 
@@ -97,13 +98,13 @@ The user deferred the complete estimate until after deployment. Record actual us
 | Existing OTel collection | Preserved unchanged | ERPBridge-attributable ingestion/query charge |
 | Email and diagnostics | Existing receiver; managed diagnostics | Delivery volume and storage charges |
 
-Report total with 20% margin on variable charges. USD 10 remains the comparison target. Azure budgets and ingestion caps are not hard spending caps. Never automatically stop ERPBridge to meet a cost target.
+Report the total with a 20% margin on variable charges. USD 10 remains the comparison target. Azure budgets and ingestion caps are not hard spending caps. Never automatically stop ERPBridge to meet a cost target.
 
 ## Observation and rollback
 
-Observe at least 24 hours before marking acceptance complete. Confirm one truly unattended scheduled backup, continuous fresh telemetry, public/MCP health, collector/AMA memory, alert noise, and current costs. Do not substitute a manually triggered backup for this evidence.
+Observe the deployment for at least 24 hours before you mark acceptance complete. Confirm one truly unattended scheduled backup, continuous fresh telemetry, public/MCP health, collector/AMA memory, alert noise, and current costs. Do not use a manually triggered backup as a substitute for this evidence.
 
-Maintenance suppression requires a defined end time and automatic expiry. Preserve independent public monitoring where possible and record the maintenance reason. Never leave the no-data alert suppressed indefinitely.
+Set a defined end time and automatic expiry for maintenance suppression. Preserve independent public monitoring where possible and record the maintenance reason. Never leave the no-data alert suppressed indefinitely.
 
 Rollback disables only the new collector timer, new alert rules, and new collector DCR association. Preserve the VM, database, backups, prior portal resources, existing AMA/OTel association, and shared workspaces. Review any resource removal separately. Never run root-wide `terraform destroy`.
 
@@ -126,6 +127,6 @@ Rollback disables only the new collector timer, new alert rules, and new collect
 
 ### Remaining acceptance
 
-The standalone action-group test API returned `Conflict: Free subscription not supported`. This does not prove that real alert email is unavailable. No recipient-confirmed delivery or actual fired/resolved pair was established before test cleanup. Do not claim notification delivery is proven.
+The standalone action-group test API returned `Conflict: Free subscription not supported`. This does not prove that real alert email is unavailable. Test cleanup occurred without recipient-confirmed delivery or an actual fired/resolved pair. Do not claim that notification delivery is proven.
 
-Still pending: recipient-confirmed email delivery, a completed fired/resolved rule test if required, 24-hour observation, a genuinely unattended backup, and post-deployment cost review. Source changes remain uncommitted alongside pre-existing migration work; no unrelated changes were committed. Kuma deployment is paused at the user's request.
+The following remain pending: recipient-confirmed email delivery, a completed fired/resolved rule test if required, 24-hour observation, a genuinely unattended backup, and post-deployment cost review. Source changes remain uncommitted alongside pre-existing migration work. No unrelated changes were committed. Kuma deployment is paused at the user's request.

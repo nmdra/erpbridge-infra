@@ -1,9 +1,10 @@
 # Disposable Uptime Kuma dashboard
 
-> **Historical POC documentation.** The recorded deployments were torn down in
-> October 2026. Status, tool counts, approvals, and acceptance results below
-> describe dated work, not current services or permission to deploy again.
-> Check the versioned configuration and obtain fresh approval before cloud changes.
+> **Historical POC documentation.** The recorded deployments were deleted in
+> October 2026. The status, tool counts, approvals, and acceptance results below
+> describe past work. They do not describe current services or give permission
+> to deploy again. Before cloud changes, check the versioned configuration and
+> get new approval.
 
 This root is an isolated prototype, not a durable monitoring service. It does not
 replace Azure Monitor. It uses the existing ACA Consumption environment through
@@ -11,10 +12,10 @@ data sources only. It does not own that environment or its workspace.
 
 **Deployment status:** local implementation and offline tests do not prove live
 Azure authentication, browser callbacks, route normalization, sizing or public
-publication. Record those results separately before enabling anonymous paths.
+publication. Record those results separately before you enable anonymous paths.
 The user waived the earlier USD 5/10 pre-deployment gates and requested cost
 review after deployment. This does not authorize unrelated resources or resizing.
-No cloud changes are performed by the local verifier or unit tests.
+The local verifier and unit tests do not make cloud changes.
 
 ## Ownership and image evidence
 
@@ -47,17 +48,17 @@ Primary sources used during implementation:
 
 The selected release uses root HTTP 302 for the unmapped entry page. ACA HTTP
 probes accept successful 2xx/3xx responses. Startup, readiness and liveness check
-`/` on port 3001. These are process probes, not proof of monitor configuration.
-Runtime probe behavior still requires deployment verification. Allocation is
+`/` on port 3001. These process probes do not prove monitor configuration.
+Verify runtime probe behavior during deployment. Allocation is
 0.25 CPU/0.5 GiB, Single revision, min=max=1, native HTTP/WebSocket ingress, TLS
-required. Stop for a decision if sizing fails. Do not silently resize or scale
-to zero. No browser monitors, sidecar, Docker socket or notification delivery.
+required. If sizing fails, stop for a decision. Do not silently resize or scale
+to zero. There are no browser monitors, sidecar, Docker socket or notification delivery.
 
 ## Protected operator inputs
 
 Prepare private files outside the repository with mode 0600 and a parent directory
 with mode 0700. Use a protected `-var-file` path, not secret values in arguments.
-Disable shell tracing and `TF_LOG`. Protect state, backups and saved plan files;
+Disable shell tracing and `TF_LOG`. Protect state, backups and saved plan files.
 Terraform sensitive values can still enter state and provider requests. Do not
 upload state, saved plans, cookies, recovery codes, screenshots containing account
 identifiers or unredacted provider diagnostics.
@@ -81,8 +82,8 @@ Cloudflare 5.24.0. No existing root is upgraded.
 
 Cloudflare reads `CLOUDFLARE_API_TOKEN` from a protected operator environment. Use
 only the approved zone's DNS edit permission. Supply `cloudflare_zone_id` privately
-when enabling the domain. Missing token is a deployment blocker, not permission
-to broaden credentials or bypass DNS ownership review.
+when you enable the domain. If the token is missing, stop deployment. Do not
+broaden credentials or bypass DNS ownership review.
 
 Register these exact web redirect URIs in the approved Entra app:
 
@@ -96,7 +97,7 @@ as ACA `entra-client-secret`; it is never output. Track its expiry privately.
 
 ## Three-stage commissioning
 
-Every stage requires a reviewed plan from **this root only**. Plan must not
+Every stage requires a reviewed plan from **this root only**. The plan must not
 replace or modify the shared environment, workspace or existing application/DNS.
 Do not use `-target` as the normal deployment workflow.
 
@@ -125,20 +126,20 @@ Do not use `-target` as the normal deployment workflow.
 `publish=false` is internal by default. There is no auth-disable input. Never
 remove platform auth to work around setup, Socket.IO, callback or static failures.
 
-Because `Return401` does not redirect visitors to login, operators explicitly open:
+Because `Return401` does not redirect visitors to login, operators must explicitly open:
 
 `https://erpbridge-uptime.nimendra.online/.auth/login/aad?post_login_redirect_uri=/dashboard`
 
 Use the equivalent default-host URL for that host's test. Complete Entra login,
-then Kuma's own login/setup. Prove the allowed operator can use authenticated
-Socket.IO. Prove another authenticated identity is denied before allowing public
-paths. Do not save either session in repository evidence.
+then Kuma's own login/setup. Prove that the allowed operator can use authenticated
+Socket.IO. Before you allow public paths, prove that another authenticated
+identity is denied. Do not save either session in repository evidence.
 
 ## Supported UI reconstruction
 
 The two JSON files under `config/` are specifications, **not import files**.
 There is no administrative REST API client or unsupported Socket.IO automation.
-After every reset, use the release's normal UI:
+After every reset, use the normal UI for this release:
 
 1. Complete protected first-user setup. Use a unique strong administrator password
    and enable Kuma 2FA. Store recovery material privately. Do not disable Kuma
@@ -169,9 +170,9 @@ After every reset, use the release's normal UI:
    and inspect its public JSON through the protected session. Do not publish an
    empty required group. Only then acknowledge stage 3.
 
-A mapped canonical root serves HTTP 200. The default host can redirect exactly
-to `/status/erpbridge` when that is the entry page. The verifier never follows
-that redirect; it checks its exact Location and separately checks the status URL.
+A mapped canonical root serves HTTP 200. When `/status/erpbridge` is the entry page,
+the default host can redirect exactly to that path. The verifier never follows
+that redirect. It checks the exact Location and separately checks the status URL.
 Do not permit redirects from monitored services.
 
 ERPBridge `/mcp/health` needs exact 200 plus literal `"status":"ok"`; a root 200
@@ -181,11 +182,11 @@ ERPNext needs exact 200 plus `pong`. Workflow must use exactly
 checks a UI shell, not JavaScript boot, login, backend APIs or workflow execution.
 ToolPlane checks its documentation root only.
 
-Before deliberate ERPNext shutdown, create a scheduled maintenance window for
-that monitor and a public notice with an end time. Verify actual maintenance
-rendering. Pausing a monitor is not automatically a maintenance notice. Extend
-maintenance explicitly; remove it after readiness returns. Never hide unexpected
-failure or reconstruct erased history as UP.
+Before a deliberate ERPNext shutdown, create a scheduled maintenance window for
+that monitor and a public notice with an end time. Verify how maintenance
+actually appears. Pausing a monitor does not automatically create a maintenance
+notice. Extend maintenance explicitly. Remove it after readiness returns. Never
+hide unexpected failure or reconstruct erased history as UP.
 
 ## Verification and publication limits
 
@@ -226,14 +227,14 @@ static asset count, and 100 heartbeat samples per monitor. Default sample age is
 900 seconds, configurable from 60 to 3600 seconds with `--max-age`. The check
 rejects future samples, private IDs/labels, nonempty public heartbeat messages,
 raw response fields, and obvious credential/IP/identity text.
-This is defense in depth, not proof that arbitrary free text contains no secrets.
-Manually review all public text. No bodies are saved by the tool.
+These checks provide defense in depth. They do not prove that arbitrary free text
+contains no secrets. Manually review all public text. The tool saves no bodies.
 
 The verifier probes anonymous setup/database setup, dashboard, management,
 Socket.IO polling, push/badge/metrics, query and encoded/traversal-like paths.
-Unexpected 200, redirect, 403 or 404 on protected paths fails its strict 401
-contract. Some normalization variants may fail on the real platform. That is a
-publication blocker to investigate, not justification to weaken exclusions.
+An unexpected 200, redirect, 403 or 404 on protected paths fails its strict 401
+contract. Some normalization variants may fail on the real platform. If this
+occurs, block publication and investigate. Do not weaken exclusions.
 The sole wildcard is `/assets/*`; there is no Socket.IO or generic API wildcard.
 Public routes cache config for five minutes and heartbeat for one minute. Measure
 visible delay rather than claiming immediate updates.
@@ -251,7 +252,7 @@ trace before adding it. Never exempt setup, management or Socket.IO.
 Replica-local EmptyDir `/app/data` can disappear after restart, rescheduling or
 revision replacement. This removes users, 2FA, monitors, incidents and history.
 The control-plane auth policy survives database loss. Public reads may become
-unavailable; protected setup must remain unclaimable. Return to authenticated-only
+unavailable. Protected setup must remain unclaimable. Return to authenticated-only
 stage 2 (`public_status_enabled=false`) before an approved reset/rebuild. Restore
 the catalogue through the UI, then repeat stage-3 verification. Never restart
 ERPBridge/ERPNext or modify their endpoints for Kuma testing.
@@ -265,8 +266,8 @@ Record only redacted evidence: app/auth policy present, callback success,
 allowed-operator success, unauthorized-user denial, anonymous route matrix,
 all four public labels, five private rows absent, sample freshness, footer text,
 maintenance/DOWN/recovery separation, no notifications, restart/rebuild result.
-Do not mark these complete based on mocks. Desktop/mobile browser acceptance and
-actual ACA/TLS policy tests remain operator work.
+Do not mark these complete based on mocks. The operator must still complete
+desktop/mobile browser acceptance and actual ACA/TLS policy tests.
 
 Observe at least 24 hours of CPU, memory, replica continuity, temporary-storage
 use, database growth, heartbeat freshness and public response time. Review costs
@@ -278,8 +279,8 @@ or a promise that credit/free allowance makes the service free. If costs or sizi
 fail expectations, return for a decision. No automatic spending shutdown or
 silent resize is configured.
 
-This is one ACA probe location, not global or independent multi-region coverage.
+This provides one ACA probe location, not global or independent multi-region coverage.
 An environment outage can remove both Kuma and MockERP. A Kuma self-check is not
-independent monitoring. Public percentages cover retained observations only, not
-an SLA. Rollback removes only reviewed Kuma-owned resources and its two new DNS
+independent monitoring. Public percentages cover retained observations only.
+They do not provide an SLA. Rollback removes only reviewed Kuma-owned resources and its two new DNS
 records, never the shared environment/workspace or another application record.

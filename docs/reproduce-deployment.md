@@ -1,15 +1,16 @@
 # Reproduce the ERPNext and ERPBridge demo
 
-> **Historical POC documentation.** The recorded deployments were torn down in
-> October 2026. Status, tool counts, approvals, and acceptance results below
-> describe dated work, not current services or permission to deploy again.
-> Check the versioned configuration and obtain fresh approval before cloud changes.
+> **Historical POC documentation.** The recorded deployments were deleted in
+> October 2026. The status, tool counts, approvals, and acceptance results below
+> describe past work. They do not describe current services or give permission
+> to deploy again. Before cloud changes, check the versioned configuration and
+> get new approval.
 
 This runbook reproduces the research POC tested on 2026-10-15. It covers restarting the existing deployment and building the same baseline from empty Terraform state. **Do not run the rebuild steps against the current running deployment.**
 
-Commands assume Bash on a Linux operator machine, from the repository root. Keep the same shell for the rebuild's exported metadata. If you open a new shell, reload the metadata and existing credentials; do not rerun secret-generation blocks. Python examples use the standard library. This document contains no usable credentials. Run one reviewed step at a time. Stop on an error before continuing; the unconfirmed-start case has its own read-only checks below.
+Run commands in Bash on a Linux operator machine, from the repository root. Keep the same shell for the rebuild's exported metadata. If you open a new shell, reload the metadata and existing credentials. Do not rerun secret-generation blocks. Python examples use the standard library. This document contains no usable credentials. Run one reviewed step at a time. If an error occurs, stop before you continue. For an unconfirmed start, use the read-only checks below.
 
-The current source includes approved expansions to **45 tools**, including accounting, asset, and assignment reads. New writes and reports remain deferred. The existing deployment preserves an operator-owned revision that blocks broad re-onboarding until reviewed; combined scans also encountered intermittent MCP errors. See [the active tool catalogue](erpnext-tools.md) for live verification evidence and permission limits. A fresh rebuild still seeds only the original SCP masters; it does not recreate existing Customers, Suppliers, or Orders. When those lists are empty, named-get verification records direct REST 404 plus an MCP `explicit-error-probe`, not a successful named-record read.
+The current source includes approved expansions to **45 tools**, including accounting, asset, and assignment reads. New writes and reports remain deferred. The existing deployment preserves an operator-owned revision. Until that revision is reviewed, it blocks broad re-onboarding. Combined scans also encountered intermittent MCP errors. See [the active tool catalogue](erpnext-tools.md) for live verification evidence and permission limits. A fresh rebuild still seeds only the original SCP masters; it does not recreate existing Customers, Suppliers, or Orders. When those lists are empty, named-get verification records direct REST 404 plus an MCP `explicit-error-probe`, not a successful named-record read.
 
 ## 1. Choose the correct procedure
 
@@ -44,7 +45,7 @@ Canonical endpoints:
 - MCP: <https://erpbridge.nimendra.online/mcp/>
 - MockERP: <https://mockerp.nimendra.online>
 
-The procedure is specific to these names. The ERPNext zone ID and hostname are also defined in `terraform-erpnext/main.tf`; changing only shell variables does not move it to another domain.
+The procedure is specific to these names. The ERPNext zone ID and hostname are also defined in `terraform-erpnext/main.tf`. Changing only shell variables does not move ERPNext to another domain.
 
 ## 2. Safety, prerequisites, and files
 
@@ -60,14 +61,14 @@ Before provisioning, starting compute, changing DNS, registering providers, or r
 
 Do not convert Azure for Students to pay-as-you-go or buy an AI service. The earlier test's USD 5 allowance is historical, not permission for unlimited future use.
 
-The reference modeled base was about USD 0.16943/hour for VM, disk/IP, and two active ACA replicas before free grants, logs, network use, and other variable charges. Reprice before use. Deallocation stops VM compute charges only. ACA, disk, public IP, and logs can continue to use credit.
+The reference model estimated a base cost of about USD 0.16943/hour for VM, disk/IP, and two active ACA replicas before free grants, logs, network use, and other variable charges. Check prices again before use. Deallocation stops VM compute charges only. ACA, disk, public IP, and logs can continue to use credit.
 
 ### Operator tools and source
 
 - Terraform `>=1.9, <2.0`, Azure CLI, Git, GNU Make, Python 3, Bash, `curl`, `jq`, `getent`, and OpenSSH tools.
 - A compatible `bridgectl` supporting API registration, OpenAPI generation, named/versioned tool reads, validation, application, and scoped client-token creation.
 - Both committed Terraform lock files and the complete reviewed source tree: `terraform/`, `terraform-erpnext/`, `demo/erpnext/`, `config/`, `scripts/`, and `tests/`.
-- The source changes must be saved in the revision you reproduce. An old `HEAD` alone does not include uncommitted or untracked implementation files. Record `git rev-parse HEAD` and `git status --short` privately before packaging a handoff.
+- Save the source changes in the revision you reproduce. An old `HEAD` alone does not include uncommitted or untracked implementation files. Before you package a handoff, record `git rev-parse HEAD` and `git status --short` privately.
 - Do not copy provider caches between machines. Initialize each root independently. Keep provider versions from the lock files.
 - PyYAML is needed only for the separate MockERP onboarding script, not this ERPNext path. Do not run MockERP onboarding while ERPNext is selected.
 
@@ -100,7 +101,7 @@ Ubuntu image `latest` and archive packages are not fully version-pinned. This re
 | `artifacts/deployment-output.json` | Main operator URLs and allowlisted login/token summary |
 | Both roots' `terraform.tfstate*` | Managed resource identity and potentially sensitive values |
 
-These files are Git-ignored. Keep secret files and state mode `0600` on a private filesystem. Transfer private backups separately from source code. Never publish a whole working-directory/archive copy containing ignored secrets.
+These files are Git-ignored. Keep secret files and state at mode `0600` on a private filesystem. Transfer private backups separately from source code. Never publish a copy of the whole working directory or an archive that contains ignored secrets.
 
 ```bash
 set +x
@@ -163,7 +164,7 @@ When finished, use Section 11. Do not continue into the rebuild procedure for a 
 
 ## 4. Rebuild: verify account, ownership, and DNS access
 
-**This section and those that follow are for a reviewed fresh deployment.** The resource group and DNS zone must already exist. Creation of a different group/domain is a separate operator decision.
+**This section and those that follow are for a reviewed fresh deployment.** The resource group and DNS zone must already exist. The operator must make a separate decision to create a different group/domain.
 
 Authenticate and select the approved subscription explicitly, then set non-secret metadata for this session:
 
@@ -184,7 +185,7 @@ az group show --name "$RESOURCE_GROUP" --query '{name:name,location:location}' -
 az resource list --resource-group "$RESOURCE_GROUP" --query '[].{name:name,type:type}' -o json
 ```
 
-Check both roots' state privately. **Empty local state does not mean Azure is empty.** Stop for an ownership/import review if resources or existing state overlap this deployment. Do not use `terraform state rm` or delete state to force a rebuild.
+Check both roots' state privately. **Empty local state does not mean Azure is empty.** If resources or existing state overlap this deployment, stop for an ownership/import review. Do not use `terraform state rm` or delete state to force a rebuild.
 
 Inspect registration before requesting any registration change:
 
@@ -194,9 +195,9 @@ for provider in Microsoft.Compute Microsoft.Network Microsoft.App Microsoft.Oper
 done
 ```
 
-The roots disable automatic provider registration. Register only missing namespaces after approval and wait for `Registered`.
+The roots disable automatic provider registration. After approval, register only missing namespaces and wait for `Registered`.
 
-In the original subscription, B2as_v2 could be allocated without a zone. B2ms was location-restricted; do not assume it is a usable fallback. Quota alone is not proof of SKU availability.
+In the original subscription, B2as_v2 could be allocated without a zone. B2ms was location-restricted. Do not assume it is a usable fallback. Quota alone does not prove SKU availability.
 
 Provide the existing Cloudflare token through a private editor or secure transfer, then load it:
 
@@ -248,7 +249,7 @@ with os.fdopen(fd, 'w') as stream:
 print('Private VM inputs created; no private-key contents read.')
 ```
 
-Run Python blocks in this runbook using `python3` with the block on stdin or a private local script. Do not paste Python directly into Bash.
+Run Python blocks in this runbook using `python3`. Supply the block on stdin or use a private local script. Do not paste Python directly into Bash.
 
 ### 5.2 Initialize, review, and apply the VM plan
 
@@ -264,7 +265,7 @@ A new VM-root plan creates eight managed resources. It must not delete or alter 
 
 ### 5.3 Verify SSH host identity through Azure
 
-Never use `StrictHostKeyChecking=no` or trust an unverified `ssh-keyscan` result. The following obtains only the VM's public host key through the authenticated Azure control plane. It refuses an existing mismatching host entry.
+Never use `StrictHostKeyChecking=no` or trust an unverified `ssh-keyscan` result. The following block obtains only the VM's public host key through the authenticated Azure control plane. If an existing host entry does not match, the block stops.
 
 ```python
 import json, re, subprocess
@@ -319,11 +320,11 @@ make erpnext-data-check
 
 The driver transfers reviewed code, creates the explicit `frontend` site, initializes locale/country fixtures, creates separate credentials, and enables Caddy. It saves local `artifacts/erpnext-credentials.json` with mode `0600`. The API integration identity is not Administrator.
 
-Success means the two seed runs and integration-user data check pass. The eight fixture Items must retain their expected codes/names/groups/units. These are masters only, not stock balances or financial transactions. If the first bootstrap fails before local credentials are saved, follow Section 10; do not reset passwords or delete volumes.
+Both seed runs and the integration-user data check must pass. The eight fixture Items must retain their expected codes/names/groups/units. These are masters only, not stock balances or financial transactions. If the first bootstrap fails before local credentials are saved, follow Section 10. Do not reset passwords or delete volumes.
 
 ## 6. Rebuild: prepare the selected ERPNext ACA inputs
 
-Keep both immutable image references from the tested example. Changing images is a new compatibility decision. This creates application secrets **once** and refuses an existing configuration file.
+Keep both immutable image references from the tested example. Changing images requires a new compatibility decision. The following block creates application secrets **once**. If the configuration file already exists, the block stops.
 
 ```python
 import ipaddress, json, os, secrets, stat
@@ -387,7 +388,7 @@ This targeted apply is a bootstrap exception, not the normal deployment workflow
 
 ### 7.2 Create and verify WorkloadProfiles mode
 
-This block makes an approved Azure write. It uses a temporary mode-0600 request file for the workspace key, removes that file, and never places the key in command arguments or prints it. Existing environments cause a stop, not an overwrite. An ambiguous PUT failure requires a GET/ownership review before any retry.
+This block makes an approved Azure write. It uses a temporary mode-0600 request file for the workspace key and removes that file. It never places the key in command arguments or prints it. If the environment already exists, the block stops without overwriting it. After an ambiguous PUT failure, review GET results and ownership before any retry.
 
 ```python
 import json, os, subprocess, tempfile, time
@@ -460,7 +461,7 @@ Continue only when mode is `WorkloadProfiles` and state is `Succeeded`.
 
 ### 7.3 Adopt the exact environment into Terraform
 
-Use only the resource you just created and verified. If the Terraform address is already occupied, stop and review state; do not remove it automatically.
+Use only the resource you just created and verified. If the Terraform address is already occupied, stop and review state. Do not remove it automatically.
 
 ```bash
 ENVIRONMENT_ID="/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.App/managedEnvironments/$ENVIRONMENT_NAME"
@@ -477,9 +478,9 @@ chmod 600 terraform/tfplan
 terraform -chdir=terraform apply -input=false tfplan
 ```
 
-Apply the exact saved plan. `make apply` instead plans/applies current inputs interactively; it does not apply the saved `tfplan`. Do not use it as a substitute for this reviewed-plan step.
+Apply the exact saved plan. `make apply` instead plans and applies current inputs interactively. It does not apply the saved `tfplan`. Do not use it as a substitute for this reviewed-plan step.
 
-Expected changes are new apps, CNAME/TXT records, DNS waits, custom domains, certificates, and bindings. An environment tags-only reconciliation can be expected after manual creation. Stop for an unexplained environment replacement, disk deletion, resource-group change, old-zone change, or unrelated resource change.
+Expect new apps, CNAME/TXT records, DNS waits, custom domains, certificates, and bindings. After manual creation, you can expect a reconciliation of environment tags only. If the plan shows an unexplained environment replacement, disk deletion, resource-group change, old-zone change, or unrelated resource change, stop.
 
 Wait for apply completion. DNS/certificate issuance can take several minutes. Do not recreate apps just because a recursive resolver still has an old negative answer. The DNS wait checks matching CNAME and TXT values through two resolvers.
 
@@ -531,9 +532,9 @@ Create the named client token once, not on every verification. After a successfu
 - [ ] Administrator login and visual Item inspection work in the browser. Inspect the password privately, not on a shared terminal.
 - [ ] The chosen existing AI client is configured with the remote MCP URL and its client token, then rehearsed separately.
 
-A 200 response containing JSON-RPC `error` or MCP `isError` is a failure. The verifier must not be weakened to accept it.
+A 200 response containing JSON-RPC `error` or MCP `isError` is a failure. Do not weaken the verifier to accept it.
 
-Two important native contracts are already handled by the checked-in onboarding/verification code:
+The checked-in onboarding/verification code already handles two important native contracts:
 
 - Create inputs are the flat Item fields, not `{"body": {...}}`.
 - DELETE returns HTTP 202 with `{"data":"ok"}`. Onboarding preserves its object envelope for MCP output validation.
@@ -548,7 +549,7 @@ A post-deployment `terraform -chdir=terraform plan -input=false -detailed-exitco
 
 The remote file may already exist at `/opt/erpnext-demo/credentials.json`. The driver intentionally refuses a retry with missing local credentials. Do not delete the remote file, `.env`, site, database, or Docker volumes, and do not generate replacement passwords.
 
-After verifying SSH host identity, recover the **existing** file without printing it. This refuses an existing local destination:
+After you verify SSH host identity, recover the **existing** file without printing it. If the local destination already exists, this block stops:
 
 ```python
 import json, os, subprocess
@@ -577,7 +578,7 @@ with os.fdopen(fd, 'w') as stream:
 print('Existing credentials recovered privately; no rotation.')
 ```
 
-Inspect the concrete bootstrap failure in protected VM/container logs, fix its cause, and retry `make erpnext-bootstrap CONFIRM=yes`. Native site creation, protected console namespace handling, and locale initialization fixes are already in this source tree. Do not copy the older evaluation bootstrap over them.
+Inspect the specific bootstrap failure in protected VM/container logs, fix its cause, and retry `make erpnext-bootstrap CONFIRM=yes`. Native site creation, protected console namespace handling, and locale initialization fixes are already in this source tree. Do not copy the older evaluation bootstrap over them.
 
 ### ACA registry or client token lost
 
@@ -609,7 +610,7 @@ Do not use `-plugin-dir` pointing at a root's `.terraform/providers` while the s
 
 ### Backup limitation
 
-The live backup attempt failed and no disposable restore has passed. `backup.sh`/`restore.sh` are not an accepted disaster-recovery path yet. Do not destroy the VM/disk if its data is needed.
+The live backup attempt failed and no disposable restore has passed. `backup.sh`/`restore.sh` are not an accepted disaster-recovery path yet. If you need the VM/disk data, do not destroy the VM/disk.
 
 Any future restore must use a separate explicitly named disposable site/database, preserve target database routing, restore the source encryption material, and verify records and encrypted credentials. Never restore over `frontend` as an automatic fix. See [the viva operations notes](erpnext-viva.md#9-stop-compute-and-recover) for the guarded interface and limits.
 
@@ -620,9 +621,9 @@ make erpnext-deallocate CONFIRM=yes
 make erpnext-status
 ```
 
-Expected final power state: `PowerState/deallocated`, not merely guest `stopped`. If completion is unconfirmed, inspect state rather than claiming billing has stopped.
+Expected final power state: `PowerState/deallocated`, not merely guest `stopped`. If completion is unconfirmed, inspect state. Do not claim that billing has stopped.
 
-Do not deallocate during a presentation or an active write/backup. Disk/IP, ACA, and logging charges continue afterwards. Stopping/deleting/rescaling ACA or deleting disks needs a separate decision; deallocation is not full teardown.
+Do not deallocate during a presentation or an active write/backup. Disk/IP, ACA, and logging charges continue afterwards. Stopping/deleting/rescaling ACA or deleting disks requires a separate decision. Deallocation is not full teardown.
 
 Record the source revision/dirty state, date, region/SKU, environment mode, plan summaries, checks passed/failed, elapsed running time, and final power state. Keep credential files and detailed logs private. Redact screenshots. Do not claim backup recovery or AI-client success from a deterministic MCP script.
 
@@ -635,7 +636,7 @@ terraform -chdir=terraform validate -no-color
 terraform -chdir=terraform-erpnext validate -no-color
 ```
 
-Validation needs initialized providers. Mocked tests do not allocate Azure resources or prove current credit/capacity. The reference final suite passed 57 tests; the live test also passed exact MCP discovery and real create/read/delete. The rebuild examples in this document are syntax-checked instructions based on that deployment, not a second deployment executed while writing the runbook.
+Validation requires initialized providers. Mocked tests do not allocate Azure resources or prove current credit/capacity. The reference final suite passed 57 tests. The live test also passed exact MCP discovery and real create/read/delete. The rebuild examples in this document are syntax-checked instructions based on that deployment. No second deployment was executed while writing the runbook.
 
 ## References
 

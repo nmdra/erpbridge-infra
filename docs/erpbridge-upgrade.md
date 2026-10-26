@@ -1,16 +1,17 @@
 # ERPBridge version upgrade runbook
 
-> **Historical POC documentation.** The recorded deployments were torn down in
-> October 2026. Status, tool counts, approvals, and acceptance results below
-> describe dated work, not current services or permission to deploy again.
-> Check the versioned configuration and obtain fresh approval before cloud changes.
+> **Historical POC documentation.** The recorded deployments were deleted in
+> October 2026. The status, tool counts, approvals, and acceptance results below
+> describe past work. They do not describe current services or give permission
+> to deploy again. Before cloud changes, check the versioned configuration and
+> get new approval.
 
 ## Purpose
 
-This runbook tells you how to move the live ERPBridge Container App to a new image. The runbook
-keeps the existing single-replica Azure Container Apps (ACA) setup, the SQLite file at
-`/tmp/erpbridge.db`, and the EmptyDir volume `/data`. The runbook also tells you how to keep the
-token records, the `erpnext` API registration, and the application configuration.
+Use this runbook to move the live ERPBridge Container App to a new image. Keep the existing
+single-replica Azure Container Apps (ACA) setup, the SQLite file at `/tmp/erpbridge.db`, and the
+EmptyDir volume `/data`. Also keep the token records, the `erpnext` API registration, and the
+application configuration.
 
 ## Scope and constraints
 
@@ -38,10 +39,10 @@ If you clear the registry and apply the same revisions again, the server publish
 
 ## Prerequisites
 
-1. Obtain an explicit acceptance of the restore gate and of its future cold-start behaviour. Refer
-   to [Required restore gate](#required-restore-gate).
+1. Obtain explicit acceptance of the restore gate and its future cold-start behaviour. Refer to
+   [Required restore gate](#required-restore-gate).
 2. Make sure that you can open a terminal session to the exact running replica. The restore step
-   needs this access. If the access is not available, stop and inspect the state. Do not bypass the
+   needs this access. If access is not available, stop and inspect the state. Do not bypass the
    restore gate.
 
 ## Target images
@@ -57,8 +58,8 @@ The new revision starts a small shell gate before the server. The gate waits for
 file. The gate does not create an empty registry and does not contain an embedded database or a
 restore seed.
 
-The operator sends the compressed verified snapshot into a private temporary file in the exact new
-running replica. Verify the SHA-256 value and mode `0600`. Then rename the file atomically to
+Send the compressed, verified snapshot to a private temporary file in the exact new running
+replica. Verify the SHA-256 value and mode `0600`. Then rename the file atomically to
 `/tmp/erpbridge.db`. Only then does the gate execute the server.
 
 A TCP startup probe allows 240 attempts at one-second intervals, with a three-second timeout. The
@@ -66,9 +67,9 @@ existing readiness and liveness checks remain. These values give the operator a 
 window before normal liveness processing.
 
 **Storage remains ephemeral.** A future replacement replica with no database waits for another
-authorized restore and remains unready. It does not automatically replay an old snapshot and it does
-not resurrect revoked tokens. This is not persistent storage and it is not a zero-downtime
-guarantee. MCP clients may need to reconnect after the revision change.
+authorized restore and remains unready. It does not automatically replay an old snapshot or restore
+revoked tokens. This is not persistent storage and does not guarantee zero downtime. MCP clients
+may need to reconnect after the revision change.
 
 ## Procedure
 
@@ -83,8 +84,8 @@ Do the steps in this order. Complete each step before you start the next step.
 2. **Compare the live state.**
    1. Compare the live logical database contents, the image, and the configuration with the verified
       backup.
-   2. If you find a difference, stop and take a fresh consistent snapshot. A raw observation that
-      you use for this comparison is not a new consistent snapshot.
+   2. If you find a difference, stop and take a fresh consistent snapshot. A raw observation used
+      for this comparison is not a new consistent snapshot.
 
 3. **Update the app template only.**
    1. Set the pinned image.
@@ -114,7 +115,7 @@ Do the steps in this order. Complete each step before you start the next step.
       deployments keep the existing default, because the flag defaults to `false`.
 
 9. **Resume the administration.**
-   1. Resume the administration after the final readback only.
+   1. Only after the final readback, resume the administration.
    2. Do not claim durability for `/tmp` or for EmptyDir.
 
 ## Verify the upgrade
@@ -132,11 +133,11 @@ Verify all items in this table after the new revision is ready.
 | Native identity read | Matches the independent ERPNext REST response |
 | Configuration, secrets, ingress, scale, revision mode, API registration | Unchanged |
 
-Report the native identity read separately. That single read is not a full-catalogue semantic
-acceptance.
+Report the native identity read separately. That single read does not establish full-catalogue
+semantic acceptance.
 
-Do not claim a full-catalogue execution test from these items. No uninterrupted all-tool execution
-scan exists.
+Do not claim that these items establish a full-catalogue execution test. No uninterrupted all-tool
+execution scan exists.
 
 ## Rollback
 
@@ -153,13 +154,13 @@ Do not do these actions:
 - Do not reuse a migrated open database.
 - Do not replace a live SQLite file in place.
 
-After the registry and token changes resume, a restore of the old snapshot can undo those changes or
-resurrect revoked tokens. Capture fresh state and obtain an operator review before a later rollback.
+After registry and token changes resume, a restore of the old snapshot can undo those changes or
+restore revoked tokens. Before a later rollback, capture fresh state and obtain an operator review.
 
-The operator-owned `get_company@1.0.1` revision was reviewed and deleted by owner
+After review, the operator-owned `get_company@1.0.1` revision was deleted by owner
 decision on 2026-10-16. The registry now holds exactly one serving revision per
-tool, so there is no operator revision to preserve or adopt. Restore it from the
-`erpbridge-demo` archive export if that decision is ever reversed.
+tool. Thus, there is no operator revision to preserve or adopt. If that
+decision is ever reversed, restore it from the `erpbridge-demo` archive export.
 
 ## Records
 
@@ -169,11 +170,11 @@ The live app runs `ghcr.io/nmdra/erpbridge-server@sha256:2ae683b46d4b7cacd4e23f0
 (`v0.5.0-alpha.5`) on revision `erpbridge-server--schema-a5-1016043623`.
 
 The requested order was: update the app first, then restore the state. The patch created the new
-revision behind the restore gate, so the new revision waited while the alpha.3 revision kept
-serving. Then the operator took a read-only snapshot of the serving revision's database. The
-snapshot command was `VACUUM INTO` through the verified helper. The operator uploaded the snapshot
-into the waiting replica, verified the SHA-256 value, and published the file with an atomic rename
-before the server started.
+revision behind the restore gate. The new revision waited while the alpha.3 revision kept serving.
+Then the operator took a read-only snapshot of the serving revision's database. The snapshot
+command was `VACUUM INTO` through the verified helper. The operator uploaded the snapshot into the
+waiting replica, verified the SHA-256 value, and published the file with an atomic rename before
+the server started.
 
 Results after startup:
 
@@ -190,8 +191,8 @@ Results after startup:
 Evidence: `artifacts/erpbridge-alpha5-upgrade-prep/` (`schema-a5-acceptance.json`,
 `post-start-dbcheck.json`, `live-snapshot.db`, the patch payload, and the failure logs, if any).
 
-Terraform is pinned to the new digest with `erpbridge_require_database_restore = true`. The rollback
-is a fresh revision with the alpha.3 digest plus an explicit restore of the same snapshot.
+Terraform is pinned to the new digest with `erpbridge_require_database_restore = true`. To roll
+back, create a fresh revision with the alpha.3 digest and explicitly restore the same snapshot.
 
 ### alpha.3 upgrade (2026-10-15)
 
@@ -210,9 +211,9 @@ the pinned alpha.3 image. The results were:
 
 Private acceptance evidence: `artifacts/erpbridge-alpha3-upgrade-prep/schema-a3-acceptance.json`.
 
-The Terraform restore gate is enabled. The image is pinned through the protected ignored
-`terraform/zz-erpbridge-upgrade.auto.tfvars.json`. Review all unrelated pending changes before a
-future Terraform apply.
+The Terraform restore gate is enabled. The protected, ignored file
+`terraform/zz-erpbridge-upgrade.auto.tfvars.json` pins the image. Before a future Terraform apply,
+review all unrelated pending changes.
 
 ### Registry re-apply (2026-10-15)
 
@@ -220,8 +221,8 @@ The operator cleared the live registry and rebuilt it from a fresh definitions e
 
 1. The preflight passed. The context was `erpbridge-demo`. Health was 200. One API was registered
    (`erpnext`). No legacy global registry was present.
-2. A fresh rollback export was captured at `tools-export-20261015T215737.780606Z`. The export held
-   46 revisions and 45 unique names. The hashes were verified.
+2. The operator captured a fresh rollback export at `tools-export-20261015T215737.780606Z`.
+   The export held 46 revisions and 45 unique names. The hashes were verified.
 3. All 46 stored revisions were hard-deleted with
    `bridgectl tool delete <name> <version> --hard --yes`. The registry read back empty.
 4. All 46 manifests were re-applied with `bridgectl tool apply -f <file>`, one file per call. The
@@ -231,15 +232,15 @@ The operator cleared the live registry and rebuilt it from a fresh definitions e
    and one native identity read was served. The API registration and all client tokens were
    untouched. No ERP write occurred.
 
-One benign drift exists. `get_company@1.0.0` reports `spec.cache.ttlSeconds` 30 instead of 300, and
-`spec.description.whenNotToUse` `[]` instead of `null`. Every other field matches the export,
-including the endpoint, the mapping, the schema, the security, and `execution.approvedOrigins`. The
-drift affects the read-cache duration only.
+One benign drift exists. `get_company@1.0.0` reports `spec.cache.ttlSeconds` 30 instead of 300,
+and `spec.description.whenNotToUse` `[]` instead of `null`. Every other field matches the export,
+including the endpoint, the mapping, the schema, the security, and `execution.approvedOrigins`.
+The drift affects the read-cache duration only.
 
 ### Clean re-apply (2026-10-15, second pass)
 
-The operator cleared the whole registry again and rebuilt it with **one revision per tool name**, to
-remove the only duplicate revision:
+To remove the only duplicate revision, the operator cleared the whole registry again and rebuilt
+it with **one revision per tool name**:
 
 - 46 revisions were hard-deleted. The registry read back empty.
 - 45 manifests were re-applied: `get_company@1.0.1` (the operator revision) plus the newest revision
@@ -255,8 +256,8 @@ Pinned clients that call `get_company.rev_MS4wLjA` (version 1.0.0) now fail. The
 `get_company` serves the operator revision `1.0.1`. The export at
 `tools-export-20261015T220630.983935Z` holds all 46 revisions and restores the previous state.
 
-Every stored revision produces an alias. Therefore, a registry cannot publish the 45 functions
-alone. Filter the aliases in the client, for example with
+Every stored revision produces an alias. Thus, a registry cannot publish only the 45 functions.
+Filter the aliases in the client, for example with
 `--exclude-tools 'mcp__erpbridge__*.rev_*'`. Evidence: `artifacts/erpbridge-clean-reapply/`.
 
 ### Registry cleared (2026-10-15, on request)
@@ -272,14 +273,14 @@ Rollback export: `tools-export-20261015T221725.721002Z` (45 revisions). Restore 
 `tools-export-20261015T220630.983935Z` holds all 46 revisions, including `get_company@1.0.0`.
 Evidence: `artifacts/erpbridge-clear-all/`.
 
-An empty registry means that every MCP client sees no ERP functions until the tools are applied
-again. The `.rev_` aliases return with any re-apply. Only a server change can stop the publication
-of the aliases.
+When the registry is empty, no MCP client sees ERP functions until the tools are applied again.
+The `.rev_` aliases return with any re-apply. Only a server change can stop publication of the
+aliases.
 
 ### Verified local evidence
 
-The pinned alpha.3 image was tested with a copy of the verified backup on an isolated Docker internal
-network:
+Tests used the pinned alpha.3 image with a copy of the verified backup on an isolated Docker
+internal network:
 
 - The health endpoint did not become ready before the database was explicitly restored.
 - All 46 stored revisions and all 45 business tool names survived the migration.
@@ -292,7 +293,7 @@ network:
 - Eight invalid-input cases were rejected through both MCP and direct invocation, with a
   sandbox-only fixture. No live fixture was published and no ERP write was invoked.
 - One harmless native identity read (`get_current_user`) matched the independent ERPNext REST
-  response after the upgrade. That is one read, not a full-catalogue execution proof.
+  response after the upgrade. That is one read, not proof of full-catalogue execution.
 - The old image and the pre-upgrade backup also passed the earlier local recovery test.
 
 Private evidence is under `artifacts/erpbridge-alpha3-upgrade-prep/`. The source backup and its
@@ -312,9 +313,9 @@ pass `--token`, before you use the CLI against the live server:
 - `BRIDGE_API_TOKEN=<token> bridgectl --context erpbridge-demo tool get get_company`
 - `bridgectl --context erpbridge-demo --token <token> tool get get_company`
 
-Without one of those two options, the command sends no usable bearer token and fails with
-`json: cannot unmarshal object into Go value of type []*mcp.Tool`, because the server returns an
-error envelope instead of a tool list.
+Without one of those two options, the command sends no usable bearer token. The server returns
+an error envelope instead of a tool list. The command then fails with
+`json: cannot unmarshal object into Go value of type []*mcp.Tool`.
 
 The alpha.6 CLI generates read tools with `cache.ttlSeconds` 60 and keeps write tools at
 `cache.enabled: false`. Install record: `artifacts/bridgectl-install/install-record.json`.

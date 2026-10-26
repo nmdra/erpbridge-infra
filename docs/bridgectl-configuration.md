@@ -1,16 +1,17 @@
 # Configure bridgectl from Terraform outputs
 
-> **Historical POC documentation.** The recorded deployments were torn down in
-> October 2026. Status, tool counts, approvals, and acceptance results below
-> describe dated work, not current services or permission to deploy again.
-> Check the versioned configuration and obtain fresh approval before cloud changes.
+> **Historical POC documentation.** The recorded deployments were deleted in
+> October 2026. The status, tool counts, approvals, and acceptance results below
+> describe past work. They do not describe current services or give permission
+> to deploy again. Before cloud changes, check the versioned configuration and
+> get new approval.
 
 ## Connect the existing ERPNext deployment
 
 The installed CLI uses context `erpbridge-demo`. Its saved endpoints are
 `https://erpbridge.nimendra.online` for the bridge and
 `https://erpnext.nimendra.online` for ERPNext. The local evaluation context is
-separate and remains unchanged.
+separate. It has not changed.
 
 From the repository root, load credentials into each Bash session:
 
@@ -22,19 +23,19 @@ make check-bridge-compatibility
 ```
 
 The loader reads the existing mode-0600 `artifacts/deployment-output.json`.
-It does not create credentials, register tools, or modify cloud resources.
-It disables shell tracing and clears stale per-shell URL/upstream-auth
-settings. The context stores environment references, not literal secrets.
-Do not change to an unrelated context while these credentials are loaded.
+It does not create credentials, register tools, or change cloud resources.
+It disables shell tracing and clears stale URL/upstream-auth settings in the
+shell. The context stores environment references, not literal secrets.
+While these credentials are loaded, do not change to an unrelated context.
 
 For a fresh deployment, use [the reproduction runbook](reproduce-deployment.md).
 **Do not run the MockERP registration steps below while ERPNext is selected.**
 
 ## Manual MockERP setup for a separately selected target
 
-The following procedure is for MockERP, not the current ERPNext deployment.
-Run it only after Terraform applies that target's Container Apps and custom
-hostnames.
+This procedure is for MockERP, not the current ERPNext deployment.
+Only after Terraform applies that target's Container Apps and custom
+hostnames, run this procedure.
 
 ## 1. Set the admin token
 
@@ -44,7 +45,7 @@ Use the Terraform admin token in the current shell:
 export BRIDGE_API_TOKEN="$TF_VAR_api_auth_token"
 ```
 
-`BRIDGE_API_TOKEN` takes precedence over a token stored in a local context.
+`BRIDGE_API_TOKEN` takes precedence over a token in a local context.
 Do not save this value in `~/.bridgectl/config.yaml`.
 
 ## 2. Read the canonical URLs
@@ -89,7 +90,7 @@ bridgectl --context "$BRIDGE_CONTEXT" api list
 ```
 
 The context name does not store the current URL overrides.
-The shell values take precedence for this command.
+For this command, the shell values take precedence.
 
 ## 4. Register MockERP
 
@@ -121,8 +122,8 @@ make onboard-mockerp
 ```
 
 The MockERP workflow uses the local OpenAPI source and the explicit approved
-name list. Do not assume the entire MockERP API is admitted. For real ERPNext,
-use `make onboard-erpnext CONFIRM=yes` after the guarded target cutover; its
+name list. Do not assume that it admits the entire MockERP API. For real ERPNext,
+after the guarded target cutover, use `make onboard-erpnext CONFIRM=yes`. Its
 curated contract contains exactly the five Company/Item operations. Follow
 [the ERPNext viva runbook](erpnext-viva.md) for URLs, credentials, and verification.
 
@@ -152,7 +153,7 @@ artifacts/mcp-tokens.json
 ```
 
 ERPBridge does not return the raw token again.
-Use the saved file to configure the client, and do not commit it.
+Use the saved file to configure the client. Do not commit the file.
 
 ## Context field mapping
 

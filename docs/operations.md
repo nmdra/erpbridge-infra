@@ -1,14 +1,16 @@
 # Operations runbook
 
-> **Historical POC documentation.** The recorded deployments were torn down in
-> October 2026. Status, tool counts, approvals, and acceptance results below
-> describe dated work, not current services or permission to deploy again.
-> Check the versioned configuration and obtain fresh approval before cloud changes.
+> **Historical POC documentation.** The recorded deployments were deleted in
+> October 2026. The status, tool counts, approvals, and acceptance results below
+> describe past work. They do not describe current services or give permission
+> to deploy again. Before cloud changes, check the versioned configuration and
+> get new approval.
 
 For the real ERPNext VM, SCP fixtures, credentials, budget gates, and presentation
 sequence, use [ERPNext viva deployment](erpnext-viva.md). The following sections
-retain the original MockERP path; do not use its resource checks or tool name
-when `erp_target = "erpnext"`. `make verify-deployment` selects the configured target.
+keep the original MockERP path. When `erp_target = "erpnext"`, do not use the
+MockERP resource checks or tool name. `make verify-deployment` selects the
+configured target.
 
 ## 1. Authenticate
 
@@ -28,9 +30,9 @@ echo
 ```
 
 The token needs `Zone - DNS - Edit` and `Zone - Zone - Read` permissions for
-`nimendra.online`. Access to an old zone is also required if the actual state
-still owns records there. The existing token file is `secrets/cloudflare.token`
-(mode `0600`); load it into `CLOUDFLARE_API_TOKEN` without printing it.
+`nimendra.online`. If the actual state still owns records in an old zone, access to that zone is
+also required. The existing token file is `secrets/cloudflare.token`
+(mode `0600`). Load the token into `CLOUDFLARE_API_TOKEN`. Do not print the token.
 Do not store the token in Terraform files.
 
 ## 2. Apply the deployment
@@ -84,7 +86,7 @@ Run:
 make verify-deployment
 ```
 
-The command makes sure that:
+The command checks that:
 
 - Both custom names resolve.
 - Both HTTPS health endpoints return success.
@@ -94,7 +96,7 @@ The command makes sure that:
 - MCP creates a session.
 - The read-only `list_warehouses` tool call succeeds.
 
-Run only the server and CLI route check with:
+To run only the server and CLI route check, use:
 
 ```bash
 make check-bridge-compatibility
@@ -113,7 +115,7 @@ The `asuid.<hostname>` TXT record contains the Azure verification ID.
 Do not enable the Cloudflare proxy for these records.
 An intermediate CNAME can prevent Azure certificate issuance and renewal.
 
-If a zone has a CAA record, make sure that it permits DigiCert:
+If a zone has a CAA record, make sure that the record permits DigiCert:
 
 ```text
 0 issue digicert.com
@@ -127,13 +129,14 @@ Microsoft.App/containerApps@2025-07-01
 
 The binding body contains the hostname, managed certificate ID, and
 `SniEnabled` binding type.
-Do not add external custom domains to these apps without merging them into the
-AzAPI custom-domain list.
+Do not add external custom domains to these apps unless you also merge the
+domains into the AzAPI custom-domain list.
 
 ## 5. Secret behavior
 
 The following values are sensitive Terraform inputs. Policy Gate, Data API,
-and Resend keys are optional and omitted from the runtime when unset:
+and Resend keys are optional. If these keys are unset, Terraform omits them
+from the runtime:
 
 - `api_auth_token`
 - `policy_gate_api_key`
@@ -141,7 +144,7 @@ and Resend keys are optional and omitted from the runtime when unset:
 - `resend_api_key`
 - `mockerp_credentials`
 
-Terraform passes them to Container Apps as application secrets. The Policy Gate
+Terraform passes these values to Container Apps as application secrets. The Policy Gate
 credential is exposed to ERPBridge only as the `POLICY_GATE_API_KEY` secret
 reference used by the registered API. The Data API credential is exposed only
 as the `DATA_API_KEY` secret reference. The Resend credential is exposed only
@@ -158,9 +161,10 @@ token <api_key>:<api_secret>
 ```
 
 For `erp_target = "erpnext"`, set its HTTPS origin and separate integration token.
-Do not set a conflicting `erpbridge_erp_base_url` override. Pause demo calls and
-disable the previous target's owned tools before changing the credential; then
-onboard and verify the selected set. Do not delete unrelated tools/APIs.
+Do not set a conflicting `erpbridge_erp_base_url` override. Before you change
+the credential, pause demo calls and disable the previous target's owned tools.
+Then change the credential, onboard the selected set, and verify the selected set.
+Do not delete unrelated tools or APIs.
 Invalid credentials stop the plan before Azure creates a Container App revision.
 
 ## 6. Output artifact
@@ -178,9 +182,10 @@ artifacts/deployment-output.json
 ```
 
 The file contains URLs, Azure fallback URLs, image references, ingress values,
-and demo credentials. With ERPNext selected, it reads both Terraform roots and
-the protected bootstrap file and includes the ERPNext Administrator login.
-Re-export does not rotate passwords or create client tokens.
+and demo credentials. When ERPNext is selected, the export reads both Terraform
+roots and the protected bootstrap file. When ERPNext is selected, the export
+also includes the ERPNext Administrator login. If you export the file again,
+the export does not rotate passwords or create client tokens.
 The file has mode `0600` and is ignored by Git.
 
 Do not print the file in a shared terminal.
@@ -217,9 +222,9 @@ Run:
 make onboard-mockerp
 ```
 
-The command registers MockERP, rewrites the OpenAPI server URL to the
-canonical MockERP URL, generates the approved tool set, validates each file,
-applies each tool, and confirms tool discovery.
+The command registers MockERP and changes the OpenAPI server URL to the
+canonical MockERP URL. Then the command generates the approved tool set,
+validates each file, applies each tool, and confirms tool discovery.
 
 The default source is:
 
