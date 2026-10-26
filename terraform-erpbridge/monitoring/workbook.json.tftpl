@@ -1,0 +1,88 @@
+{
+  "version": "Notebook/1.0",
+  "isLocked": false,
+  "fallbackResourceIds": [
+    ${jsonencode(workspace_id)}
+  ],
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# ERPBridge VM monitoring\nMissing telemetry means lost observation, not proof of VM failure. AllFaults lists every current incident reason. Unknown numeric values are -1; check availability flags. Enable the guest rule after commissioning."
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "Current sample, all faults, disk, backup, service/container/AMA memory and OOM counters",
+        "query": ${jsonencode(current_query)},
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          ${jsonencode(workspace_id)}
+        ],
+        "visualization": "table",
+        "size": 0
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "Independent HTTPS availability",
+        "query": "AppAvailabilityResults | where TimeGenerated > ago(24h) | summarize Availability=100.0 * avg(toint(Success)) by bin(TimeGenerated, 15m), Location",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          ${jsonencode(workspace_id)}
+        ],
+        "visualization": "timechart",
+        "size": 0
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "Guest memory and pressure",
+        "query": "ERPBridgeHealth_CL | where TimeGenerated > ago(24h) and tolower(VmResourceId) == '${vm_resource_id}' | project TimeGenerated, MemoryAvailableBytes, MemoryTotalBytes, MemoryPressureSomeAvg10, MemoryPressureFullAvg10, MemoryPressureAvailable, SwapUsedBytes",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          ${jsonencode(workspace_id)}
+        ],
+        "visualization": "table",
+        "size": 0
+      }
+    },
+    {
+      "type": 10,
+      "content": {
+        "version": "MetricsItem/2.0",
+        "title": "VM platform CPU and available memory",
+        "size": 0,
+        "chartType": 2,
+        "resourceType": "microsoft.compute/virtualmachines",
+        "resourceIds": [
+          ${jsonencode(vm_resource_id)}
+        ],
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "metrics": [
+          {
+            "namespace": "microsoft.compute/virtualmachines",
+            "metric": "Percentage CPU",
+            "aggregation": 4
+          },
+          {
+            "namespace": "microsoft.compute/virtualmachines",
+            "metric": "Available Memory Bytes",
+            "aggregation": 4
+          }
+        ]
+      }
+    }
+  ]
+}

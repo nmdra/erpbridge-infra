@@ -1,0 +1,114 @@
+[
+  {
+    "name": "TimeGenerated",
+    "type": "datetime"
+  },
+  {
+    "name": "VmResourceId",
+    "type": "string"
+  },
+  {
+    "name": "MemoryAvailableBytes",
+    "type": "long"
+  },
+  {
+    "name": "MemoryTotalBytes",
+    "type": "long"
+  },
+  {
+    "name": "MemoryPressureSomeAvg10",
+    "type": "real"
+  },
+  {
+    "name": "MemoryPressureFullAvg10",
+    "type": "real"
+  },
+  {
+    "name": "MemoryPressureAvailable",
+    "type": "boolean"
+  },
+  {
+    "name": "SwapUsedBytes",
+    "type": "long"
+  },
+  {
+    "name": "KernelOomKills",
+    "type": "long"
+  },
+  {
+    "name": "KernelOomAvailable",
+    "type": "boolean"
+  },
+  {
+    "name": "RootFreeBytes",
+    "type": "long"
+  },
+  {
+    "name": "RootUsedPercent",
+    "type": "real"
+  },
+  {
+    "name": "RootInodeUsedPercent",
+    "type": "real"
+  },
+  {
+    "name": "ErpbridgeActive",
+    "type": "boolean"
+  },
+  {
+    "name": "CaddyActive",
+    "type": "boolean"
+  },
+  {
+    "name": "BackendHttpStatus",
+    "type": "int"
+  },
+  {
+    "name": "ServiceFault",
+    "type": "boolean"
+  },
+  {
+    "name": "DiskFault",
+    "type": "boolean"
+  },
+  {
+    "name": "BackupAgeSeconds",
+    "type": "long"
+  },
+  {
+    "name": "BackupFailed",
+    "type": "boolean"
+  },
+  {
+    "name": "BackupStatusValid",
+    "type": "boolean"
+  },
+  {
+    "name": "ContainerMemoryBytes",
+    "type": "long"
+  },
+  {
+    "name": "ContainerOomKills",
+    "type": "long"
+  },
+  {
+    "name": "ContainerCountersAvailable",
+    "type": "boolean"
+  },
+  {
+    "name": "ErpbridgeServiceMemoryBytes",
+    "type": "long"
+  },
+  {
+    "name": "CaddyMemoryBytes",
+    "type": "long"
+  },
+  {
+    "name": "AmaMemoryBytes",
+    "type": "long"
+  },
+  {
+    "name": "ServiceMemoryAvailable",
+    "type": "boolean"
+  }
+]

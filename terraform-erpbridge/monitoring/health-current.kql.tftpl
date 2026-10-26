@@ -1,0 +1,12 @@
+let expected = datatable(ExpectedVm:string) ['${vm_resource_id}'];
+let latestVmSamples = ERPBridgeHealth_CL
+  | where TimeGenerated > ago(30m) and TimeGenerated <= now()
+  | where tolower(VmResourceId) == '${vm_resource_id}'
+  | summarize arg_max(TimeGenerated, *) by VmKey=tolower(VmResourceId);
+expected
+  | join kind=leftouter latestVmSamples on $left.ExpectedVm == $right.VmKey
+  | extend NoData = isnull(TimeGenerated) or TimeGenerated < ago(10m)
+  | extend Service = coalesce(ServiceFault, false), Disk = coalesce(DiskFault, false),
+      Backup = isnotnull(TimeGenerated) and (coalesce(BackupFailed, true) or not(coalesce(BackupStatusValid, false)) or coalesce(BackupAgeSeconds, -1) < 0 or BackupAgeSeconds > 93600)
+  | extend AllFaults = strcat(iff(NoData, 'no-data; ', ''), iff(Service, 'service/backend; ', ''), iff(Disk, 'disk/inodes; ', ''), iff(Backup, 'backup; ', ''))
+  | extend SampleAgeSeconds = datetime_diff('second', now(), TimeGenerated)

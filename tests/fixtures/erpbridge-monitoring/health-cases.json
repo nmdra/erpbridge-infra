@@ -1,0 +1,14 @@
+[
+  {"id":"healthy","rows":[{"age_seconds":60}],"faults":[]},
+  {"id":"seven-minutes-old","rows":[{"age_seconds":420}],"faults":[]},
+  {"id":"older-than-ten-minutes","rows":[{"age_seconds":601}],"faults":["NoData"]},
+  {"id":"never-seen","rows":[],"faults":["NoData"]},
+  {"id":"delayed-replay","rows":[{"age_seconds":1801}],"faults":["NoData"]},
+  {"id":"multiple-faults","rows":[{"age_seconds":60,"ServiceFault":true,"DiskFault":true,"BackupFailed":true}],"faults":["Service","Disk","Backup"]},
+  {"id":"fresh-recovery","rows":[{"age_seconds":120,"ServiceFault":true,"DiskFault":true,"BackupFailed":true},{"age_seconds":60}],"faults":[]},
+  {"id":"backup-exact-boundary","rows":[{"age_seconds":60,"BackupAgeSeconds":93600}],"faults":[]},
+  {"id":"backup-stale","rows":[{"age_seconds":60,"BackupAgeSeconds":93601}],"faults":["Backup"]},
+  {"id":"backup-invalid","rows":[{"age_seconds":60,"BackupAgeSeconds":-1,"BackupStatusValid":false}],"faults":["Backup"]},
+  {"id":"future-event","rows":[{"age_seconds":-600}],"faults":["NoData"]},
+  {"id":"different-vm","rows":[{"age_seconds":60,"other_vm":true}],"faults":["NoData"]}
+]

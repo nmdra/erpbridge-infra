@@ -1,0 +1,30 @@
+[Unit]
+Description=Bounded ERPBridge operational health sample
+After=docker.service
+
+[Service]
+Type=oneshot
+# AMA's mdsd reader runs as syslog. Root retains probe permissions while
+# only this log directory and its 0640 records are readable by that group.
+Group=syslog
+EnvironmentFile=/etc/erpbridge/monitor.env
+ExecStart=/usr/bin/python3 /opt/erpbridge/monitor.py --once
+# RuntimeMaxSec alone does not bound Type=oneshot startup.
+TimeoutStartSec=15
+RuntimeMaxSec=15
+MemoryMax=64M
+Nice=19
+IOSchedulingClass=idle
+CPUWeight=10
+IOWeight=10
+StateDirectory=erpbridge-monitor
+StateDirectoryMode=0700
+LogsDirectory=erpbridge-monitor
+LogsDirectoryMode=0750
+UMask=0027
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/erpbridge-monitor /var/log/erpbridge-monitor
+# Root reads selected Docker and cgroup state. No application env file is read.

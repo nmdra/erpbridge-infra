@@ -1,0 +1,12 @@
+[Unit]
+Description=Sample ERPBridge health each minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=1s
+Persistent=false
+Unit=erpbridge-monitor.service
+# systemd never starts another instance of an already active oneshot.
+
+[Install]
+WantedBy=timers.target
