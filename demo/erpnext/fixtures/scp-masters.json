@@ -1,0 +1,15 @@
+{
+  "company": {"company_name": "Serendib Consumer Products (Pvt) Ltd", "abbr": "SCP", "country": "Sri Lanka", "default_currency": "LKR"},
+  "item_groups": ["Raw Materials", "Packaging", "Finished Goods", "Imported Products", "Office Supplies", "Spare Parts", "WIP"],
+  "uoms": [{"uom_name": "Nos", "must_be_whole_number": 1}, {"uom_name": "Box", "must_be_whole_number": 1}, {"uom_name": "Kg", "must_be_whole_number": 0}, {"uom_name": "Litre", "must_be_whole_number": 0}],
+  "items": [
+    {"item_code": "RM-SUGAR-001", "item_name": "Ceylon Cane Sugar", "item_group": "Raw Materials", "stock_uom": "Kg", "is_stock_item": 1},
+    {"item_code": "RM-CLEANER-CONC-001", "item_name": "Floor Cleaner Concentrate", "item_group": "Raw Materials", "stock_uom": "Litre", "is_stock_item": 1},
+    {"item_code": "PKG-BOTTLE-001", "item_name": "Food Grade Bottle", "item_group": "Packaging", "stock_uom": "Nos", "is_stock_item": 1},
+    {"item_code": "FG-TEA-001", "item_name": "Serendib Breakfast Tea", "item_group": "Finished Goods", "stock_uom": "Box", "is_stock_item": 1},
+    {"item_code": "FG-CLEANER-5L", "item_name": "Serendib Floor Cleaner 5L", "item_group": "Finished Goods", "stock_uom": "Nos", "is_stock_item": 1},
+    {"item_code": "IMP-SPICE-001", "item_name": "Imported Cinnamon Blend", "item_group": "Imported Products", "stock_uom": "Kg", "is_stock_item": 1},
+    {"item_code": "OFF-PAPER-001", "item_name": "Office Copy Paper", "item_group": "Office Supplies", "stock_uom": "Box", "is_stock_item": 1},
+    {"item_code": "SPARE-BELT-001", "item_name": "Factory Conveyor Belt", "item_group": "Spare Parts", "stock_uom": "Nos", "is_stock_item": 1}
+  ]
+}

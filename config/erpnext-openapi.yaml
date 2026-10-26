@@ -1,0 +1,7018 @@
+# JSON syntax is valid YAML 1.2. No YAML package is required.
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Curated ERPNext SCP demo and business API",
+    "version": "1.0.0",
+    "description": "Curated ERPNext POC: 43 operations, 2 aliases, 45 tools."
+  },
+  "servers": [
+    {
+      "url": "https://erpnext.nimendra.online/api"
+    }
+  ],
+  "security": [
+    {
+      "erpToken": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "erpToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  },
+  "paths": {
+    "/method/frappe.auth.get_logged_user": {
+      "get": {
+        "operationId": "get_current_user",
+        "summary": "Identify the shared ERP integration account",
+        "description": "Shared ERP login, not the human MCP caller.",
+        "responses": {
+          "200": {
+            "description": "Authenticated ERP integration identity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.client.get_count": {
+      "get": {
+        "operationId": "count_records",
+        "summary": "Count records of one DocType",
+        "description": "Read-only count of records for one granted DocType.",
+        "parameters": [
+          {
+            "name": "doctype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Account",
+                "Address",
+                "Asset",
+                "Asset Capitalization",
+                "Asset Category",
+                "Asset Depreciation Schedule",
+                "Asset Maintenance",
+                "Asset Movement",
+                "Asset Repair",
+                "Asset Value Adjustment",
+                "BOM",
+                "Bank Account",
+                "Batch",
+                "Bin",
+                "Company",
+                "Contact",
+                "Cost Center",
+                "Currency",
+                "Customer",
+                "Customer Group",
+                "Delivery Note",
+                "Department",
+                "Designation",
+                "Employee",
+                "Fiscal Year",
+                "GL Entry",
+                "Gender",
+                "Item",
+                "Item Group",
+                "Item Price",
+                "Journal Entry",
+                "Lead",
+                "Location",
+                "Mode of Payment",
+                "Opportunity",
+                "Payment Entry",
+                "Payment Terms Template",
+                "Price List",
+                "Project",
+                "Purchase Invoice",
+                "Purchase Order",
+                "Purchase Receipt",
+                "Quotation",
+                "Request for Quotation",
+                "Sales Invoice",
+                "Sales Order",
+                "Sales Taxes and Charges Template",
+                "Salutation",
+                "Serial No",
+                "Stock Entry",
+                "Stock Ledger Entry",
+                "Supplier",
+                "Supplier Group",
+                "Supplier Quotation",
+                "Task",
+                "Terms and Conditions",
+                "Territory",
+                "Timesheet",
+                "UOM",
+                "Warehouse",
+                "Work Order"
+              ]
+            },
+            "description": "Granted ERPNext DocType name."
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional JSON object string of ERPNext filters."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.client.get_list": {
+      "get": {
+        "operationId": "search_records",
+        "summary": "Search records of one DocType",
+        "description": "Read-only filtered list for one granted DocType. The server rejects any DocType that is not in the enum.",
+        "parameters": [
+          {
+            "name": "doctype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Account",
+                "Address",
+                "Asset",
+                "Asset Capitalization",
+                "Asset Category",
+                "Asset Depreciation Schedule",
+                "Asset Maintenance",
+                "Asset Movement",
+                "Asset Repair",
+                "Asset Value Adjustment",
+                "BOM",
+                "Bank Account",
+                "Batch",
+                "Bin",
+                "Company",
+                "Contact",
+                "Cost Center",
+                "Currency",
+                "Customer",
+                "Customer Group",
+                "Delivery Note",
+                "Department",
+                "Designation",
+                "Employee",
+                "Fiscal Year",
+                "GL Entry",
+                "Gender",
+                "Item",
+                "Item Group",
+                "Item Price",
+                "Journal Entry",
+                "Lead",
+                "Location",
+                "Mode of Payment",
+                "Opportunity",
+                "Payment Entry",
+                "Payment Terms Template",
+                "Price List",
+                "Project",
+                "Purchase Invoice",
+                "Purchase Order",
+                "Purchase Receipt",
+                "Quotation",
+                "Request for Quotation",
+                "Sales Invoice",
+                "Sales Order",
+                "Sales Taxes and Charges Template",
+                "Salutation",
+                "Serial No",
+                "Stock Entry",
+                "Stock Ledger Entry",
+                "Supplier",
+                "Supplier Group",
+                "Supplier Quotation",
+                "Task",
+                "Terms and Conditions",
+                "Territory",
+                "Timesheet",
+                "UOM",
+                "Warehouse",
+                "Work Order"
+              ]
+            },
+            "description": "Granted ERPNext DocType name."
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON object string of ERPNext filters, for example {\"status\":\"Open\"}."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.client.get_value": {
+      "get": {
+        "operationId": "get_value",
+        "summary": "Read selected fields of one record",
+        "description": "Read-only selection of declared fields for one record of a granted DocType.",
+        "parameters": [
+          {
+            "name": "doctype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Account",
+                "Address",
+                "Asset",
+                "Asset Capitalization",
+                "Asset Category",
+                "Asset Depreciation Schedule",
+                "Asset Maintenance",
+                "Asset Movement",
+                "Asset Repair",
+                "Asset Value Adjustment",
+                "BOM",
+                "Bank Account",
+                "Batch",
+                "Bin",
+                "Company",
+                "Contact",
+                "Cost Center",
+                "Currency",
+                "Customer",
+                "Customer Group",
+                "Delivery Note",
+                "Department",
+                "Designation",
+                "Employee",
+                "Fiscal Year",
+                "GL Entry",
+                "Gender",
+                "Item",
+                "Item Group",
+                "Item Price",
+                "Journal Entry",
+                "Lead",
+                "Location",
+                "Mode of Payment",
+                "Opportunity",
+                "Payment Entry",
+                "Payment Terms Template",
+                "Price List",
+                "Project",
+                "Purchase Invoice",
+                "Purchase Order",
+                "Purchase Receipt",
+                "Quotation",
+                "Request for Quotation",
+                "Sales Invoice",
+                "Sales Order",
+                "Sales Taxes and Charges Template",
+                "Salutation",
+                "Serial No",
+                "Stock Entry",
+                "Stock Ledger Entry",
+                "Supplier",
+                "Supplier Group",
+                "Supplier Quotation",
+                "Task",
+                "Terms and Conditions",
+                "Territory",
+                "Timesheet",
+                "UOM",
+                "Warehouse",
+                "Work Order"
+              ]
+            },
+            "description": "Granted ERPNext DocType name."
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON object string that identifies one record, for example {\"name\":\"FG-TEA-001\"}."
+          },
+          {
+            "name": "fieldname",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested field names."
+          },
+          {
+            "name": "as_dict",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "description": "Return a field map."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.desk.form.load.get_user_info_for_viewers": {
+      "get": {
+        "operationId": "get_user_details",
+        "summary": "Read minimal user profiles by exact ERP login",
+        "description": "Read five profile fields by exact login, not enabled status.",
+        "parameters": [
+          {
+            "name": "users",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON-encoded array of exact ERP User login IDs."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Minimal profiles; image and time_zone may be null.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "fullname": {
+                            "type": "string"
+                          },
+                          "image": {
+                            "description": "Profile image URL or null."
+                          },
+                          "time_zone": {
+                            "description": "Time zone or null."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.desk.query_report.run": {
+      "post": {
+        "operationId": "run_report",
+        "summary": "Run one native ERPNext report",
+        "description": "Read-only native report. The company is fixed to the demo company, the report name is a closed list, and the filter object rejects undeclared fields. Native report permissions and validation apply.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "report_name",
+                  "filters"
+                ],
+                "properties": {
+                  "report_name": {
+                    "type": "string",
+                    "enum": [
+                      "Trial Balance",
+                      "Profit and Loss Statement",
+                      "Balance Sheet",
+                      "General Ledger",
+                      "Accounts Receivable",
+                      "Accounts Payable",
+                      "Stock Balance",
+                      "Stock Ledger",
+                      "Warehouse Wise Stock Balance",
+                      "Gross Profit",
+                      "Sales Register",
+                      "Purchase Register",
+                      "Item-wise Sales Register"
+                    ]
+                  },
+                  "filters": {
+                    "type": "object",
+                    "required": [
+                      "company"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "company": {
+                        "type": "string",
+                        "enum": [
+                          "Serendib Consumer Products (Pvt) Ltd"
+                        ]
+                      },
+                      "from_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "to_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "period_start_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "period_end_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "report_date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "fiscal_year": {
+                        "type": "string"
+                      },
+                      "from_fiscal_year": {
+                        "type": "string"
+                      },
+                      "to_fiscal_year": {
+                        "type": "string"
+                      },
+                      "warehouse": {
+                        "type": "string"
+                      },
+                      "item_code": {
+                        "type": "string"
+                      },
+                      "item_group": {
+                        "type": "string"
+                      },
+                      "customer": {
+                        "type": "string"
+                      },
+                      "supplier": {
+                        "type": "string"
+                      },
+                      "include_zero_stock_items": {
+                        "type": "integer",
+                        "enum": [
+                          0,
+                          1
+                        ]
+                      },
+                      "ignore_err": {
+                        "type": "integer",
+                        "enum": [
+                          0,
+                          1
+                        ]
+                      },
+                      "ignore_cr_dr_metadata": {
+                        "type": "integer",
+                        "enum": [
+                          0,
+                          1
+                        ]
+                      },
+                      "filter_based_on": {
+                        "type": "string",
+                        "enum": [
+                          "Fiscal Year",
+                          "Date Range"
+                        ]
+                      },
+                      "group_by": {
+                        "type": "string",
+                        "enum": [
+                          "Item",
+                          "Item Group"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native query report result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.desk.search.get_names_for_mentions": {
+      "get": {
+        "operationId": "search_assignable_users",
+        "summary": "Search safe user-directory candidates",
+        "description": "Enabled mention-visible users, not all users. Skip groups.",
+        "parameters": [
+          {
+            "name": "search_term",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Display name, not email; empty string lists candidates."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enabled user candidates and marked group entries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "link": {
+                            "type": "string"
+                          },
+                          "is_group": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.desk.search.search_link": {
+      "get": {
+        "operationId": "search_link",
+        "summary": "Search link-field candidates",
+        "description": "Read-only link-field search for one granted DocType. Use it to resolve a document name before a write.",
+        "parameters": [
+          {
+            "name": "doctype",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Account",
+                "Address",
+                "Asset",
+                "Asset Capitalization",
+                "Asset Category",
+                "Asset Depreciation Schedule",
+                "Asset Maintenance",
+                "Asset Movement",
+                "Asset Repair",
+                "Asset Value Adjustment",
+                "BOM",
+                "Bank Account",
+                "Batch",
+                "Bin",
+                "Company",
+                "Contact",
+                "Cost Center",
+                "Currency",
+                "Customer",
+                "Customer Group",
+                "Delivery Note",
+                "Department",
+                "Designation",
+                "Employee",
+                "Fiscal Year",
+                "GL Entry",
+                "Gender",
+                "Item",
+                "Item Group",
+                "Item Price",
+                "Journal Entry",
+                "Lead",
+                "Location",
+                "Mode of Payment",
+                "Opportunity",
+                "Payment Entry",
+                "Payment Terms Template",
+                "Price List",
+                "Project",
+                "Purchase Invoice",
+                "Purchase Order",
+                "Purchase Receipt",
+                "Quotation",
+                "Request for Quotation",
+                "Sales Invoice",
+                "Sales Order",
+                "Sales Taxes and Charges Template",
+                "Salutation",
+                "Serial No",
+                "Stock Entry",
+                "Stock Ledger Entry",
+                "Supplier",
+                "Supplier Group",
+                "Supplier Quotation",
+                "Task",
+                "Terms and Conditions",
+                "Territory",
+                "Timesheet",
+                "UOM",
+                "Warehouse",
+                "Work Order"
+              ]
+            },
+            "description": "Granted ERPNext DocType name."
+          },
+          {
+            "name": "txt",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search text."
+          },
+          {
+            "name": "page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "description": "Maximum candidates to return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resource/Account": {
+      "get": {
+        "operationId": "list_accounts",
+        "summary": "List Account records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Account/{name}": {
+      "get": {
+        "operationId": "get_account",
+        "summary": "Get Account by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Address": {
+      "get": {
+        "operationId": "list_addresses",
+        "summary": "List Address records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Address/{name}": {
+      "get": {
+        "operationId": "get_address",
+        "summary": "Get Address by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Asset": {
+      "get": {
+        "operationId": "list_assets",
+        "summary": "List Asset records",
+        "description": "Read-only native Asset resource access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Capitalization": {
+      "get": {
+        "operationId": "list_asset_capitalizations",
+        "summary": "List Asset Capitalization records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Asset%20Capitalization/{name}": {
+      "get": {
+        "operationId": "get_asset_capitalization",
+        "summary": "Get Asset Capitalization by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Asset%20Category": {
+      "get": {
+        "operationId": "list_asset_categories",
+        "summary": "List Asset Category records",
+        "description": "Read-only native Asset Category resource access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Category/{name}": {
+      "get": {
+        "operationId": "get_asset_category",
+        "summary": "Get Asset Category records",
+        "description": "Read-only native Asset Category resource access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Depreciation%20Schedule": {
+      "get": {
+        "operationId": "list_asset_depreciation_schedules",
+        "summary": "List Asset Depreciation Schedule records",
+        "description": "Read-only depreciation schedule access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Depreciation%20Schedule/{name}": {
+      "get": {
+        "operationId": "get_asset_depreciation_schedule",
+        "summary": "Get Asset Depreciation Schedule records",
+        "description": "Read-only depreciation schedule access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Maintenance": {
+      "get": {
+        "operationId": "list_asset_maintenance",
+        "summary": "List Asset Maintenance records",
+        "description": "Read-only native Asset Maintenance resource access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Maintenance/{name}": {
+      "get": {
+        "operationId": "get_asset_maintenance",
+        "summary": "Get Asset Maintenance records",
+        "description": "Read-only native Asset Maintenance resource access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Movement": {
+      "get": {
+        "operationId": "list_asset_movements",
+        "summary": "List Asset Movement records",
+        "description": "Read-only native Asset Movement resource access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Movement/{name}": {
+      "get": {
+        "operationId": "get_asset_movement",
+        "summary": "Get Asset Movement records",
+        "description": "Read-only native Asset Movement resource access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Repair": {
+      "get": {
+        "operationId": "list_asset_repairs",
+        "summary": "List Asset Repair records",
+        "description": "Read-only native Asset Repair resource access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Repair/{name}": {
+      "get": {
+        "operationId": "get_asset_repair",
+        "summary": "Get Asset Repair records",
+        "description": "Read-only native Asset Repair resource access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Asset%20Value%20Adjustment": {
+      "get": {
+        "operationId": "list_asset_value_adjustments",
+        "summary": "List Asset Value Adjustment records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Asset%20Value%20Adjustment/{name}": {
+      "get": {
+        "operationId": "get_asset_value_adjustment",
+        "summary": "Get Asset Value Adjustment by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Asset/{name}": {
+      "get": {
+        "operationId": "get_asset",
+        "summary": "Get Asset records",
+        "description": "Read-only native Asset resource access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/BOM": {
+      "get": {
+        "operationId": "list_boms",
+        "summary": "List BOM records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/BOM/{name}": {
+      "get": {
+        "operationId": "get_bom",
+        "summary": "Get BOM by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Bank%20Account": {
+      "get": {
+        "operationId": "list_bank_accounts",
+        "summary": "List Bank Account records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Bank%20Account/{name}": {
+      "get": {
+        "operationId": "get_bank_account",
+        "summary": "Get Bank Account by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Batch": {
+      "get": {
+        "operationId": "list_batches",
+        "summary": "List Batch records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Batch/{name}": {
+      "get": {
+        "operationId": "get_batch",
+        "summary": "Get Batch by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Bin": {
+      "get": {
+        "operationId": "list_bins",
+        "summary": "List Bin records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Bin/{name}": {
+      "get": {
+        "operationId": "get_bin",
+        "summary": "Get Bin by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Company": {
+      "get": {
+        "operationId": "list_companies",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Company/{name}": {
+      "get": {
+        "operationId": "get_company",
+        "summary": "Get Company by name",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Contact": {
+      "get": {
+        "operationId": "list_contacts",
+        "summary": "List Contact records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Contact/{name}": {
+      "get": {
+        "operationId": "get_contact",
+        "summary": "Get Contact by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Cost%20Center": {
+      "get": {
+        "operationId": "list_cost_centers",
+        "summary": "List Cost Center records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Cost%20Center/{name}": {
+      "get": {
+        "operationId": "get_cost_center",
+        "summary": "Get Cost Center by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Currency": {
+      "get": {
+        "operationId": "list_currencies",
+        "summary": "List Currency records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Currency/{name}": {
+      "get": {
+        "operationId": "get_currency",
+        "summary": "Get Currency by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Customer": {
+      "post": {
+        "operationId": "create_customer",
+        "summary": "Create one Customer master record",
+        "description": "Write route for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "customer_name",
+                  "customer_group",
+                  "territory"
+                ],
+                "properties": {
+                  "customer_name": {
+                    "type": "string"
+                  },
+                  "customer_group": {
+                    "type": "string",
+                    "enum": [
+                      "Commercial",
+                      "Demo Customer Group",
+                      "Government",
+                      "Individual",
+                      "Non Profit"
+                    ]
+                  },
+                  "territory": {
+                    "type": "string",
+                    "enum": [
+                      "Sri Lanka",
+                      "Rest Of The World"
+                    ]
+                  },
+                  "customer_type": {
+                    "type": "string",
+                    "enum": [
+                      "Company",
+                      "Individual"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "list_customers",
+        "summary": "List Customer records",
+        "description": "Read-only list of Customer records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Customer%20Group": {
+      "get": {
+        "operationId": "list_customer_groups",
+        "summary": "List Customer Group records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Customer%20Group/{name}": {
+      "get": {
+        "operationId": "get_customer_group",
+        "summary": "Get Customer Group by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Customer/{name}": {
+      "delete": {
+        "operationId": "delete_customer",
+        "summary": "Delete one Customer record",
+        "description": "Write route for the demo dataset programme.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact record name."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_customer",
+        "summary": "Get Customer by name",
+        "description": "Read-only named read of one Customer record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Delivery%20Note": {
+      "get": {
+        "operationId": "list_delivery_notes",
+        "summary": "List Delivery Note records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Delivery%20Note/{name}": {
+      "get": {
+        "operationId": "get_delivery_note",
+        "summary": "Get Delivery Note by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Department": {
+      "get": {
+        "operationId": "list_departments",
+        "summary": "List Department records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Department/{name}": {
+      "get": {
+        "operationId": "get_department",
+        "summary": "Get Department by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Designation": {
+      "get": {
+        "operationId": "list_designations",
+        "summary": "List Designation records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Designation/{name}": {
+      "get": {
+        "operationId": "get_designation",
+        "summary": "Get Designation by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Employee": {
+      "get": {
+        "operationId": "list_employees",
+        "summary": "List Employee records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Employee/{name}": {
+      "get": {
+        "operationId": "get_employee",
+        "summary": "Get Employee by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Fiscal%20Year": {
+      "get": {
+        "operationId": "list_fiscal_years",
+        "summary": "List Fiscal Year records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Fiscal%20Year/{name}": {
+      "get": {
+        "operationId": "get_fiscal_year",
+        "summary": "Get Fiscal Year by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/GL%20Entry": {
+      "get": {
+        "operationId": "list_gl_entries",
+        "summary": "List GL Entry records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/GL%20Entry/{name}": {
+      "get": {
+        "operationId": "get_gl_entry",
+        "summary": "Get GL Entry by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Gender": {
+      "get": {
+        "operationId": "list_genders",
+        "summary": "List Gender records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Gender/{name}": {
+      "get": {
+        "operationId": "get_gender",
+        "summary": "Get Gender by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Item": {
+      "get": {
+        "operationId": "list_items",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "create_item",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "item_code",
+                  "item_name",
+                  "item_group",
+                  "stock_uom",
+                  "is_stock_item"
+                ],
+                "properties": {
+                  "item_code": {
+                    "type": "string"
+                  },
+                  "item_name": {
+                    "type": "string"
+                  },
+                  "item_group": {
+                    "type": "string"
+                  },
+                  "stock_uom": {
+                    "type": "string"
+                  },
+                  "is_stock_item": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resource/Item%20Group": {
+      "get": {
+        "operationId": "list_item_groups",
+        "summary": "List Item Group records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Item%20Group/{name}": {
+      "get": {
+        "operationId": "get_item_group",
+        "summary": "Get Item Group by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Item%20Price": {
+      "post": {
+        "operationId": "create_item_price",
+        "summary": "Create one Item Price record",
+        "description": "Write route for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "item_code",
+                  "price_list",
+                  "price_list_rate"
+                ],
+                "properties": {
+                  "item_code": {
+                    "type": "string"
+                  },
+                  "price_list": {
+                    "type": "string",
+                    "enum": [
+                      "Standard Selling",
+                      "Standard Buying"
+                    ]
+                  },
+                  "price_list_rate": {
+                    "type": "number"
+                  },
+                  "uom": {
+                    "type": "string"
+                  },
+                  "customer": {
+                    "type": "string"
+                  },
+                  "supplier": {
+                    "type": "string"
+                  },
+                  "valid_from": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "list_item_prices",
+        "summary": "List Item Price records",
+        "description": "Read-only list of Item Price records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Item%20Price/{name}": {
+      "delete": {
+        "operationId": "delete_item_price",
+        "summary": "Delete one Item Price record",
+        "description": "Write route for the demo dataset programme.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact record name."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_item_price",
+        "summary": "Get Item Price by name",
+        "description": "Read-only named read of one Item Price record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Item/{name}": {
+      "get": {
+        "operationId": "get_item",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "delete_item",
+        "responses": {
+          "202": {
+            "description": "Item deleted: native JSON acknowledgement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "operationId": "update_item",
+        "summary": "Update one Item master record",
+        "description": "Update the declared Item master fields of one existing Item. Does not create, submit, or delete records.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "item_name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "item_group": {
+                    "type": "string"
+                  },
+                  "stock_uom": {
+                    "type": "string"
+                  },
+                  "is_stock_item": {
+                    "type": "integer",
+                    "enum": [
+                      0,
+                      1
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resource/Journal%20Entry": {
+      "get": {
+        "operationId": "list_journal_entries",
+        "summary": "List Journal Entry records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Journal%20Entry/{name}": {
+      "get": {
+        "operationId": "get_journal_entry",
+        "summary": "Get Journal Entry by name",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Lead": {
+      "get": {
+        "operationId": "list_leads",
+        "summary": "List Lead records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Lead/{name}": {
+      "get": {
+        "operationId": "get_lead",
+        "summary": "Get Lead by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Location": {
+      "get": {
+        "operationId": "list_locations",
+        "summary": "List Location records",
+        "description": "Read-only native Location resource access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Location/{name}": {
+      "get": {
+        "operationId": "get_location",
+        "summary": "Get Location records",
+        "description": "Read-only native Location resource access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Mode%20of%20Payment": {
+      "get": {
+        "operationId": "list_modes_of_payment",
+        "summary": "List Mode of Payment records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Mode%20of%20Payment/{name}": {
+      "get": {
+        "operationId": "get_mode_of_payment",
+        "summary": "Get Mode of Payment by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Opportunity": {
+      "get": {
+        "operationId": "list_opportunities",
+        "summary": "List Opportunity records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Opportunity/{name}": {
+      "get": {
+        "operationId": "get_opportunity",
+        "summary": "Get Opportunity by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Payment%20Entry": {
+      "get": {
+        "operationId": "list_payment_entries",
+        "summary": "List Payment Entry records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Payment%20Entry/{name}": {
+      "get": {
+        "operationId": "get_payment_entry",
+        "summary": "Get Payment Entry by name",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Payment%20Terms%20Template": {
+      "get": {
+        "operationId": "list_payment_terms_templates",
+        "summary": "List Payment Terms Template records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Payment%20Terms%20Template/{name}": {
+      "get": {
+        "operationId": "get_payment_terms_template",
+        "summary": "Get Payment Terms Template by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Price%20List": {
+      "get": {
+        "operationId": "list_price_lists",
+        "summary": "List Price List records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Price%20List/{name}": {
+      "get": {
+        "operationId": "get_price_list",
+        "summary": "Get Price List by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Project": {
+      "get": {
+        "operationId": "list_projects",
+        "summary": "List Project records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Project/{name}": {
+      "get": {
+        "operationId": "get_project",
+        "summary": "Get Project by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Purchase%20Invoice": {
+      "get": {
+        "operationId": "list_purchase_invoices",
+        "summary": "List Purchase Invoice records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Purchase%20Invoice/{name}": {
+      "get": {
+        "operationId": "get_purchase_invoice",
+        "summary": "Get Purchase Invoice by name",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Purchase%20Order": {
+      "get": {
+        "operationId": "list_purchase_orders",
+        "summary": "List Purchase Order records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Purchase%20Order/{name}": {
+      "get": {
+        "operationId": "get_purchase_order",
+        "summary": "Get Purchase Order by name",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Purchase%20Receipt": {
+      "get": {
+        "operationId": "list_purchase_receipts",
+        "summary": "List Purchase Receipt records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Purchase%20Receipt/{name}": {
+      "get": {
+        "operationId": "get_purchase_receipt",
+        "summary": "Get Purchase Receipt by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Quotation": {
+      "get": {
+        "operationId": "list_quotations",
+        "summary": "List Quotation records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Quotation/{name}": {
+      "get": {
+        "operationId": "get_quotation",
+        "summary": "Get Quotation by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Request%20for%20Quotation": {
+      "get": {
+        "operationId": "list_request_for_quotations",
+        "summary": "List Request for Quotation records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Request%20for%20Quotation/{name}": {
+      "get": {
+        "operationId": "get_request_for_quotation",
+        "summary": "Get Request for Quotation by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Sales%20Invoice": {
+      "get": {
+        "operationId": "list_sales_invoices",
+        "summary": "List Sales Invoice records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Sales%20Invoice/{name}": {
+      "get": {
+        "operationId": "get_sales_invoice",
+        "summary": "Get Sales Invoice by name",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Sales%20Order": {
+      "get": {
+        "operationId": "list_sales_orders",
+        "summary": "List Sales Order records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/Sales%20Order/{name}": {
+      "get": {
+        "operationId": "get_sales_order",
+        "summary": "Get Sales Order by name",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/Sales%20Taxes%20and%20Charges%20Template": {
+      "get": {
+        "operationId": "list_sales_taxes_and_charges_templates",
+        "summary": "List Sales Taxes and Charges Template records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Sales%20Taxes%20and%20Charges%20Template/{name}": {
+      "get": {
+        "operationId": "get_sales_taxes_and_charges_template",
+        "summary": "Get Sales Taxes and Charges Template by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Salutation": {
+      "get": {
+        "operationId": "list_salutations",
+        "summary": "List Salutation records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Salutation/{name}": {
+      "get": {
+        "operationId": "get_salutation",
+        "summary": "Get Salutation by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Serial%20No": {
+      "get": {
+        "operationId": "list_serial_nos",
+        "summary": "List Serial No records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Serial%20No/{name}": {
+      "get": {
+        "operationId": "get_serial_no",
+        "summary": "Get Serial No by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Stock%20Entry": {
+      "get": {
+        "operationId": "list_stock_entries",
+        "summary": "List Stock Entry records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Stock%20Entry/{name}": {
+      "get": {
+        "operationId": "get_stock_entry",
+        "summary": "Get Stock Entry by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Stock%20Ledger%20Entry": {
+      "get": {
+        "operationId": "list_stock_ledger_entries",
+        "summary": "List Stock Ledger Entry records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Stock%20Ledger%20Entry/{name}": {
+      "get": {
+        "operationId": "get_stock_ledger_entry",
+        "summary": "Get Stock Ledger Entry by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Supplier": {
+      "post": {
+        "operationId": "create_supplier",
+        "summary": "Create one Supplier master record",
+        "description": "Write route for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "supplier_name",
+                  "supplier_group"
+                ],
+                "properties": {
+                  "supplier_name": {
+                    "type": "string"
+                  },
+                  "supplier_group": {
+                    "type": "string",
+                    "enum": [
+                      "Demo Supplier Group",
+                      "Distributor",
+                      "Electrical",
+                      "Hardware",
+                      "Local",
+                      "Pharmaceutical",
+                      "Raw Material",
+                      "Services"
+                    ]
+                  },
+                  "country": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "list_suppliers",
+        "summary": "List Supplier records",
+        "description": "Read-only list of Supplier records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Supplier%20Group": {
+      "get": {
+        "operationId": "list_supplier_groups",
+        "summary": "List Supplier Group records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Supplier%20Group/{name}": {
+      "get": {
+        "operationId": "get_supplier_group",
+        "summary": "Get Supplier Group by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Supplier%20Quotation": {
+      "get": {
+        "operationId": "list_supplier_quotations",
+        "summary": "List Supplier Quotation records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Supplier%20Quotation/{name}": {
+      "get": {
+        "operationId": "get_supplier_quotation",
+        "summary": "Get Supplier Quotation by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Supplier/{name}": {
+      "delete": {
+        "operationId": "delete_supplier",
+        "summary": "Delete one Supplier record",
+        "description": "Write route for the demo dataset programme.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact record name."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_supplier",
+        "summary": "Get Supplier by name",
+        "description": "Read-only named read of one Supplier record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Task": {
+      "get": {
+        "operationId": "list_tasks",
+        "summary": "List Task records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Task/{name}": {
+      "get": {
+        "operationId": "get_task",
+        "summary": "Get Task by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Terms%20and%20Conditions": {
+      "get": {
+        "operationId": "list_terms_and_conditions",
+        "summary": "List Terms and Conditions records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Terms%20and%20Conditions/{name}": {
+      "get": {
+        "operationId": "get_terms_and_conditions",
+        "summary": "Get Terms and Conditions by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Territory": {
+      "get": {
+        "operationId": "list_territories",
+        "summary": "List Territory records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Territory/{name}": {
+      "get": {
+        "operationId": "get_territory",
+        "summary": "Get Territory by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Timesheet": {
+      "get": {
+        "operationId": "list_timesheets",
+        "summary": "List Timesheet records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Timesheet/{name}": {
+      "get": {
+        "operationId": "get_timesheet",
+        "summary": "Get Timesheet by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/ToDo": {
+      "get": {
+        "operationId": "list_assignments",
+        "summary": "List ToDo records",
+        "description": "Read-only native ToDo resource access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/ToDo/{name}": {
+      "get": {
+        "operationId": "get_assignment",
+        "summary": "Get ToDo records",
+        "description": "Read-only native ToDo resource access.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          },
+          "404": {
+            "description": "The requested document does not exist"
+          }
+        }
+      }
+    },
+    "/resource/UOM": {
+      "get": {
+        "operationId": "list_uoms",
+        "summary": "List UOM records",
+        "description": "Integration-user read access.",
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "limit_start",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The integration user does not have read permission"
+          }
+        }
+      }
+    },
+    "/resource/UOM/{name}": {
+      "get": {
+        "operationId": "get_uom",
+        "summary": "Get UOM by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Warehouse": {
+      "get": {
+        "operationId": "list_warehouses",
+        "summary": "List Warehouse records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Warehouse/{name}": {
+      "get": {
+        "operationId": "get_warehouse",
+        "summary": "Get Warehouse by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/resource/Work%20Order": {
+      "get": {
+        "operationId": "list_work_orders",
+        "summary": "List Work Order records",
+        "description": "Read-only list of records from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "Resource list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON array of requested ERPNext field names."
+          },
+          {
+            "name": "limit_page_length",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "description": "Maximum number of records to return."
+          }
+        ]
+      }
+    },
+    "/resource/Work%20Order/{name}": {
+      "get": {
+        "operationId": "get_work_order",
+        "summary": "Get Work Order by name",
+        "description": "Read-only named read of one record from ERPNext.",
+        "responses": {
+          "200": {
+            "description": "ERPNext resource response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/method/frappe.client.insert": {
+      "post": {
+        "operationId": "insert_document",
+        "summary": "Create one draft document of any granted DocType",
+        "description": "Whitelisted ERPNext method for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doc"
+                ],
+                "properties": {
+                  "doc": {
+                    "type": "string",
+                    "description": "The document as a JSON object string."
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.desk.form.save.savedocs": {
+      "post": {
+        "operationId": "submit_document",
+        "summary": "Submit one existing draft document",
+        "description": "Whitelisted ERPNext method for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doc",
+                  "action"
+                ],
+                "properties": {
+                  "doc": {
+                    "type": "string",
+                    "description": "The document as a JSON object string."
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "Submit"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.client.cancel": {
+      "post": {
+        "operationId": "cancel_document",
+        "summary": "Cancel one submitted document",
+        "description": "Whitelisted ERPNext method for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doctype",
+                  "name"
+                ],
+                "properties": {
+                  "doctype": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.client.delete": {
+      "post": {
+        "operationId": "delete_document",
+        "summary": "Delete one draft document",
+        "description": "Whitelisted ERPNext method for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doctype",
+                  "name"
+                ],
+                "properties": {
+                  "doctype": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.client.set_value": {
+      "post": {
+        "operationId": "update_document",
+        "summary": "Update fields on one existing document of any granted DocType",
+        "description": "Whitelisted ERPNext method for the demo dataset programme.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doctype",
+                  "name",
+                  "fieldname"
+                ],
+                "properties": {
+                  "doctype": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "fieldname": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ERPNext method response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

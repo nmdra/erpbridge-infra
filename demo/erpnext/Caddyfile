@@ -1,0 +1,6 @@
+# Installed as /etc/caddy/Caddyfile. The distro host service persists TLS state
+# under /var/lib/caddy. Never run Caddy with an ephemeral home directory.
+erpnext.nimendra.online {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:18080
+}

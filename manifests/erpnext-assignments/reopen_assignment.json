@@ -1,0 +1,126 @@
+{
+ "apiVersion": "erpbridge.io/v1",
+ "kind": "MCPTool",
+ "metadata": {
+  "name": "reopen_assignment",
+  "version": "1.0.0",
+  "module": "erpnext"
+ },
+ "spec": {
+  "description": {
+   "short": "Reopen a ToDo by setting only status=Open using native document write permission checks. Returns the updated ToDo document, not an assignment list.",
+   "whenToUse": [
+    "Reopen a ToDo by setting only status=Open using native document write permission checks. Returns the updated ToDo document, not an assignment list."
+   ],
+   "whenNotToUse": [
+    "Do not use user or role administration, and do not bypass native assignment permissions."
+   ],
+   "examples": [
+    "reopen_assignment through the native assignment action."
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true
+  },
+  "inputSchema": {
+   "type": "object",
+   "required": [
+    "doctype",
+    "name",
+    "fieldname",
+    "value"
+   ],
+   "properties": {
+    "doctype": {
+     "type": "string",
+     "enum": [
+      "ToDo"
+     ]
+    },
+    "name": {
+     "type": "string"
+    },
+    "fieldname": {
+     "type": "string",
+     "enum": [
+      "status"
+     ]
+    },
+    "value": {
+     "type": "string",
+     "enum": [
+      "Open"
+     ]
+    }
+   },
+   "additionalProperties": false
+  },
+  "outputSchema": {
+   "type": "object",
+   "required": [
+    "message"
+   ],
+   "properties": {
+    "message": {
+     "type": "object",
+     "required": [
+      "doctype",
+      "name",
+      "status"
+     ],
+     "properties": {
+      "doctype": {
+       "type": "string",
+       "enum": [
+        "ToDo"
+       ]
+      },
+      "name": {
+       "type": "string"
+      },
+      "status": {
+       "type": "string",
+       "enum": [
+        "Open"
+       ]
+      }
+     },
+     "additionalProperties": true
+    }
+   },
+   "additionalProperties": true
+  },
+  "execution": {
+   "type": "http",
+   "method": "POST",
+   "endpoint": "https://erpnext.nimendra.online/api/method/frappe.client.set_value",
+   "mapping": {
+    "doctype": "doctype",
+    "name": "name",
+    "fieldname": "fieldname",
+    "value": "value"
+   },
+   "parameterLocations": {
+    "doctype": "body",
+    "name": "body",
+    "fieldname": "body",
+    "value": "body"
+   }
+  },
+  "cache": {
+   "enabled": false,
+   "ttlSeconds": 0,
+   "isReadOnly": false,
+   "flushOn": []
+  },
+  "security": {
+   "authType": "api-key",
+   "authHeader": "Authorization",
+   "credentialRef": "ERP_PRIMARY_KEY",
+   "credentialSource": "env"
+  }
+ }
+}

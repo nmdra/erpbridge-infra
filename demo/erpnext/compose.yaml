@@ -1,0 +1,113 @@
+# Demo stack only. No workers, scheduler, host database ports, or ephemeral sites.
+x-erp-image: &erp-image frappe/erpnext:v16.17.0@sha256:5eeea08874dd5a07a75fe4dee96cb65f217957da4b01acf2353c16d2d6cce1bc
+x-runtime: &runtime
+  image: *erp-image
+  restart: unless-stopped
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+services:
+  db:
+    image: mariadb:11.8@sha256:2439dcd7d14010ecd1ff7a4e1c5abe8e208c34fe35290744deeeaac3569043c3
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?protected .env required}
+    command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --skip-character-set-client-handshake]
+    volumes: [db-data:/var/lib/mysql]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+  redis-cache:
+    image: redis:6.2@sha256:d0c875bdacfb5c4d2c2d9124de3f53cee1dc9ceff8936bd459fabc135cb33015
+    restart: unless-stopped
+    volumes: [redis-cache-data:/data]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  redis-queue:
+    image: redis:6.2@sha256:d0c875bdacfb5c4d2c2d9124de3f53cee1dc9ceff8936bd459fabc135cb33015
+    restart: unless-stopped
+    volumes: [redis-queue-data:/data]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  configurator:
+    <<: *runtime
+    restart: "no"
+    entrypoint: [bash, -ec]
+    command:
+      - >-
+        ls -1 apps > sites/apps.txt;
+        bench set-config -g db_host db;
+        bench set-config -gp db_port 3306;
+        bench set-config -g redis_cache redis://redis-cache:6379;
+        bench set-config -g redis_queue redis://redis-queue:6379;
+        bench set-config -g redis_socketio redis://redis-queue:6379;
+        bench set-config -gp socketio_port 9000
+  create-site:
+    <<: *runtime
+    restart: "no"
+    depends_on:
+      configurator: {condition: service_completed_successfully}
+      db: {condition: service_healthy}
+      redis-cache: {condition: service_healthy}
+      redis-queue: {condition: service_healthy}
+    environment:
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?protected .env required}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?protected .env required}
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+      - ./create_site.py:/opt/demo/create_site.py:ro
+    entrypoint: [env/bin/python, /opt/demo/create_site.py]
+  recovery:
+    <<: *runtime
+    restart: "no"
+    profiles: [tools]
+    environment:
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?protected .env required}
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+      - ./recovery.py:/opt/demo/recovery.py:ro
+    entrypoint: [env/bin/python, /opt/demo/recovery.py]
+  backend:
+    <<: *runtime
+    depends_on:
+      create-site: {condition: service_completed_successfully}
+  websocket:
+    <<: *runtime
+    command: [node, /home/frappe/frappe-bench/apps/frappe/socketio.js]
+    environment:
+      FRAPPE_REDIS_CACHE: redis://redis-cache:6379
+      FRAPPE_REDIS_QUEUE: redis://redis-queue:6379
+      FRAPPE_REDIS_SOCKETIO: redis://redis-queue:6379
+    depends_on:
+      create-site: {condition: service_completed_successfully}
+      redis-queue: {condition: service_healthy}
+  frontend:
+    <<: *runtime
+    command: [nginx-entrypoint.sh]
+    environment:
+      BACKEND: backend:8000
+      SOCKETIO: websocket:9000
+      FRAPPE_SITE_NAME_HEADER: frontend
+      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
+      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      UPSTREAM_REAL_IP_RECURSIVE: "off"
+      PROXY_READ_TIMEOUT: "120"
+      CLIENT_MAX_BODY_SIZE: 50m
+    ports: ["127.0.0.1:18080:8080"]
+    depends_on: [backend, websocket]
+volumes:
+  sites:
+  logs:
+  db-data:
+  redis-cache-data:
+  redis-queue-data:

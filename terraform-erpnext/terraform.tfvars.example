@@ -1,0 +1,18 @@
+# Copy to a protected local tfvars file only after checking ignore rules.
+# This independent root does not use or migrate the existing ACA state.
+# Authenticate Azure with the operator's existing CLI/environment setup.
+# Supply Cloudflare authentication with CLOUDFLARE_API_TOKEN, never here.
+subscription_id = "00000000-0000-0000-0000-000000000000"
+tenant_id       = "00000000-0000-0000-0000-000000000000"
+
+resource_group_name  = "erpbridge-hq"
+deployment_location  = "centralindia" # Independent of the resource group location.
+vm_name              = "erpnext-demo"
+vm_size              = "Standard_B2as_v2"
+ssh_username         = "erpnext"
+ssh_public_key_path  = "~/.ssh/erpnext-demo.pub"
+ssh_private_key_path = "~/.ssh/erpnext-demo" # Path string only, never read by Terraform.
+operator_ssh_cidr    = "203.0.113.10/32"     # Replace with your actual operator IPv4 /32.
+
+# No usable passwords, SSH private keys, or application secrets belong here.
+# Review budget/quota, DNS changes, and a real plan before any authorized apply.

@@ -1,0 +1,415 @@
+# JSON syntax is valid YAML 1.2. No YAML package is required.
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Unpublished ERPNext assignment actions",
+    "version": "1.0.0",
+    "description": "Offline preparation for native Frappe v16.17.0. No publication or live acceptance. Closed schemas require a separately verified runtime upgrade; old CLI validation does not prove closure enforcement."
+  },
+  "servers": [
+    {
+      "url": "https://erpnext.nimendra.online/api"
+    }
+  ],
+  "security": [
+    {
+      "erpToken": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "erpToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  },
+  "paths": {
+    "/method/frappe.desk.form.assign_to.add": {
+      "post": {
+        "operationId": "create_assignment",
+        "summary": "Create assignments for user login strings. Native permission checks apply. May auto-share the referenced document if permitted; notification delivery is not proven.",
+        "description": "Create assignments for user login strings. Native permission checks apply. May auto-share the referenced document if permitted; notification delivery is not proven.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doctype",
+                  "name",
+                  "assign_to"
+                ],
+                "properties": {
+                  "doctype": {
+                    "type": "string",
+                    "enum": [
+                      "Asset",
+                      "Asset Category",
+                      "Asset Depreciation Schedule",
+                      "Asset Maintenance",
+                      "Asset Movement",
+                      "Asset Repair",
+                      "Company",
+                      "Customer",
+                      "Item",
+                      "Item Group",
+                      "Journal Entry",
+                      "Location",
+                      "Payment Entry",
+                      "Purchase Invoice",
+                      "Purchase Order",
+                      "Sales Invoice",
+                      "Sales Order",
+                      "Supplier",
+                      "UOM"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "assign_to": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "Low",
+                      "Medium",
+                      "High"
+                    ]
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native Frappe response envelope; no projection is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "owner",
+                          "name"
+                        ],
+                        "properties": {
+                          "owner": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.desk.form.assign_to.remove": {
+      "post": {
+        "operationId": "remove_assignment",
+        "summary": "Remove the selected assignee using native Frappe permission checks.",
+        "description": "Remove the selected assignee using native Frappe permission checks.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doctype",
+                  "name",
+                  "assign_to"
+                ],
+                "properties": {
+                  "doctype": {
+                    "type": "string",
+                    "enum": [
+                      "Asset",
+                      "Asset Category",
+                      "Asset Depreciation Schedule",
+                      "Asset Maintenance",
+                      "Asset Movement",
+                      "Asset Repair",
+                      "Company",
+                      "Customer",
+                      "Item",
+                      "Item Group",
+                      "Journal Entry",
+                      "Location",
+                      "Payment Entry",
+                      "Purchase Invoice",
+                      "Purchase Order",
+                      "Sales Invoice",
+                      "Sales Order",
+                      "Supplier",
+                      "UOM"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "assign_to": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native Frappe response envelope; no projection is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "owner",
+                          "name"
+                        ],
+                        "properties": {
+                          "owner": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.desk.form.assign_to.close": {
+      "post": {
+        "operationId": "complete_assignment",
+        "summary": "Complete the selected assignment. Native close is assignee-only under the shared integration identity; this does not impersonate the caller.",
+        "description": "Complete the selected assignment. Native close is assignee-only under the shared integration identity; this does not impersonate the caller.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doctype",
+                  "name",
+                  "assign_to"
+                ],
+                "properties": {
+                  "doctype": {
+                    "type": "string",
+                    "enum": [
+                      "Asset",
+                      "Asset Category",
+                      "Asset Depreciation Schedule",
+                      "Asset Maintenance",
+                      "Asset Movement",
+                      "Asset Repair",
+                      "Company",
+                      "Customer",
+                      "Item",
+                      "Item Group",
+                      "Journal Entry",
+                      "Location",
+                      "Payment Entry",
+                      "Purchase Invoice",
+                      "Purchase Order",
+                      "Sales Invoice",
+                      "Sales Order",
+                      "Supplier",
+                      "UOM"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "assign_to": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native Frappe response envelope; no projection is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "owner",
+                          "name"
+                        ],
+                        "properties": {
+                          "owner": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/method/frappe.client.set_value": {
+      "post": {
+        "operationId": "reopen_assignment",
+        "summary": "Reopen a ToDo by setting only status=Open using native document write permission checks. Returns the updated ToDo document, not an assignment list.",
+        "description": "Reopen a ToDo by setting only status=Open using native document write permission checks. Returns the updated ToDo document, not an assignment list.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "doctype",
+                  "name",
+                  "fieldname",
+                  "value"
+                ],
+                "properties": {
+                  "doctype": {
+                    "type": "string",
+                    "enum": [
+                      "ToDo"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "fieldname": {
+                    "type": "string",
+                    "enum": [
+                      "status"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "enum": [
+                      "Open"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native Frappe response envelope; no projection is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "required": [
+                        "doctype",
+                        "name",
+                        "status"
+                      ],
+                      "properties": {
+                        "doctype": {
+                          "type": "string",
+                          "enum": [
+                            "ToDo"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "Open"
+                          ]
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -13,16 +13,27 @@ command -v bridgectl >/dev/null || { echo "bridgectl is required" >&2; exit 1; }
 bridgectl version >/dev/null 2>&1
 
 bridge_url="$(terraform -chdir="$TF_DIR" output -raw erpbridge_url)"
-mockerp_url="$(terraform -chdir="$TF_DIR" output -raw mockerp_url)"
-headers=(-H "Authorization: Bearer ${BRIDGE_API_TOKEN}" -H 'Accept: application/json')
+selected_target="$(terraform -chdir="$TF_DIR" output -raw erp_target)"
+case "$selected_target" in
+  erpnext)
+    erp_url="$(terraform -chdir="$TF_DIR" output -raw erpnext_url)"
+    probe_resource=Company
+    ;;
+  mockerp)
+    erp_url="$(terraform -chdir="$TF_DIR" output -raw mockerp_url)"
+    probe_resource=Customer
+    ;;
+  *) echo "Unsupported ERP target" >&2; exit 1 ;;
+esac
+headers=(-H 'Accept: application/json')
 
-curl --fail --silent --show-error --max-time 20 "${headers[@]}" \
+curl --fail --silent --show-error --max-time 20 --config <(printf 'header = "Authorization: Bearer %s"\n' "$BRIDGE_API_TOKEN") "${headers[@]}" \
   "$bridge_url/mcp/health" >/dev/null
 
-curl --fail --silent --show-error --max-time 20 "${headers[@]}" \
-  "$bridge_url/apis/erpbridge.io/v1/tools" | jq -e 'type == "array"' >/dev/null
+curl --fail --silent --show-error --max-time 20 --config <(printf 'header = "Authorization: Bearer %s"\n' "$BRIDGE_API_TOKEN") "${headers[@]}" \
+  "$bridge_url/apis/erpbridge.io/v1/tools" | jq -e '. == null or type == "array" or (.tools | type == "array")' >/dev/null
 
-probe_body="$(jq -nc --arg url "${mockerp_url}/api/resource/Customer" '{
+probe_body="$(jq -nc --arg url "${erp_url%/}/api/resource/${probe_resource}" '{
   url: $url,
   method: "GET",
   authType: "api-key",
@@ -34,7 +45,7 @@ trap 'rm -f "$probe_response_file"' EXIT
 probe_status="$(curl --silent --show-error --max-time 30 \
   -o "$probe_response_file" \
   -w '%{http_code}' \
-  "${headers[@]}" \
+  --config <(printf 'header = "Authorization: Bearer %s"\n' "$BRIDGE_API_TOKEN") "${headers[@]}" \
   -H 'Content-Type: application/json' \
   -X POST "$bridge_url/api/apis/test" \
   --data "$probe_body")"

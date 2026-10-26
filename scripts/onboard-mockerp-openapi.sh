@@ -15,6 +15,10 @@ command -v python3 >/dev/null || { echo "python3 is required" >&2; exit 1; }
 [[ -f "$SPEC" ]] || { echo "OpenAPI spec not found: $SPEC" >&2; exit 1; }
 [[ -f "$APPROVED_NAMES" ]] || { echo "approved tool list not found: $APPROVED_NAMES" >&2; exit 1; }
 
+selected_target="$(terraform -chdir="$TF_DIR" output -raw erp_target)"
+[[ "$selected_target" == mockerp ]] || { echo 'MockERP onboarding refused: Terraform selected another ERP target.' >&2; exit 1; }
+bridge_url="$(terraform -chdir="$TF_DIR" output -raw erpbridge_url)"
+export BRIDGE_SERVER="$bridge_url" BRIDGE_MCP_SERVER="$bridge_url"
 mockerp_url="$(terraform -chdir="$TF_DIR" output -raw mockerp_url)"
 work_dir="$(mktemp -d)"
 trap 'rm -rf "$work_dir"' EXIT

@@ -1,0 +1,15 @@
+#cloud-config
+# Ubuntu 24.04 archive packages, including the Compose v2 CLI plugin.
+# No images are pulled and no application is deployed by this bootstrap.
+package_update: true
+packages:
+  - ca-certificates
+  - docker.io
+  - docker-compose-v2
+  - caddy
+runcmd:
+  - [systemctl, enable, --now, docker]
+  - [docker, compose, version]
+  # The app bootstrap installs its Caddyfile then enables the host service.
+  # Until then do not serve the distribution's default HTTP site.
+  - [systemctl, disable, --now, caddy]
