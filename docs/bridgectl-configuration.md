@@ -1,6 +1,39 @@
 # Configure bridgectl from Terraform outputs
 
-Run this procedure after Terraform applies the Container Apps and custom
+> **Historical POC documentation.** The recorded deployments were torn down in
+> October 2026. Status, tool counts, approvals, and acceptance results below
+> describe dated work, not current services or permission to deploy again.
+> Check the versioned configuration and obtain fresh approval before cloud changes.
+
+## Connect the existing ERPNext deployment
+
+The installed CLI uses context `erpbridge-demo`. Its saved endpoints are
+`https://erpbridge.nimendra.online` for the bridge and
+`https://erpnext.nimendra.online` for ERPNext. The local evaluation context is
+separate and remains unchanged.
+
+From the repository root, load credentials into each Bash session:
+
+```bash
+source scripts/connect-bridgectl.sh
+bridgectl context list
+bridgectl tool get
+make check-bridge-compatibility
+```
+
+The loader reads the existing mode-0600 `artifacts/deployment-output.json`.
+It does not create credentials, register tools, or modify cloud resources.
+It disables shell tracing and clears stale per-shell URL/upstream-auth
+settings. The context stores environment references, not literal secrets.
+Do not change to an unrelated context while these credentials are loaded.
+
+For a fresh deployment, use [the reproduction runbook](reproduce-deployment.md).
+**Do not run the MockERP registration steps below while ERPNext is selected.**
+
+## Manual MockERP setup for a separately selected target
+
+The following procedure is for MockERP, not the current ERPNext deployment.
+Run it only after Terraform applies that target's Container Apps and custom
 hostnames.
 
 ## 1. Set the admin token
@@ -31,9 +64,9 @@ printf 'MockERP: %s\n' "$MOCKERP_URL"
 When Cloudflare DNS is enabled, these values use:
 
 ```text
-erpbridge.nimendra.xyz
-erpbridge.nimendra.xyz/mcp/
-mockerp.nimendra.xyz
+erpbridge.nimendra.online
+erpbridge.nimendra.online/mcp/
+mockerp.nimendra.online
 ```
 
 The outputs use Azure hostnames only when custom domains are disabled.
@@ -87,8 +120,11 @@ Run the deterministic onboarding workflow:
 make onboard-mockerp
 ```
 
-The workflow uses the local OpenAPI source, selects the approved 60 tools,
-validates each manifest, applies each tool, and confirms discovery.
+The MockERP workflow uses the local OpenAPI source and the explicit approved
+name list. Do not assume the entire MockERP API is admitted. For real ERPNext,
+use `make onboard-erpnext CONFIRM=yes` after the guarded target cutover; its
+curated contract contains exactly the five Company/Item operations. Follow
+[the ERPNext viva runbook](erpnext-viva.md) for URLs, credentials, and verification.
 
 ## 6. Verify the connection
 
@@ -124,7 +160,8 @@ Use the saved file to configure the client, and do not commit it.
 | --- | --- |
 | `erpbridge_url` | ERPBridge control-plane host |
 | `erpbridge_mcp_url` | Streamable MCP endpoint |
-| `mockerp_url` | MockERP API base URL |
+| `mockerp_url` | MockERP API base URL, only for its selected target |
+| `erpnext_url` | ERPNext API origin when `erp_target = "erpnext"` |
 | `BRIDGE_API_TOKEN` | Temporary admin credential for `bridgectl` |
 | `ERP_PRIMARY_KEY` | Logical upstream credential reference |
 

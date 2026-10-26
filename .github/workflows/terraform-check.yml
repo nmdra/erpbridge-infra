@@ -12,16 +12,45 @@ jobs:
   terraform:
     name: Terraform format and validation
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        root:
+          - terraform
+          - terraform-erpnext
+          - terraform-erpbridge
+          - terraform-uptime
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.15.8
       - name: Check formatting
-        run: terraform fmt -check -recursive terraform
+        run: terraform fmt -check -recursive '${{ matrix.root }}'
       - name: Initialize without a backend
-        working-directory: terraform
-        run: terraform init -backend=false -input=false
+        working-directory: ${{ matrix.root }}
+        run: terraform init -backend=false -input=false -lockfile=readonly
       - name: Validate
-        working-directory: terraform
+        working-directory: ${{ matrix.root }}
         run: terraform validate -no-color
+      - name: Mocked infrastructure contracts
+        working-directory: ${{ matrix.root }}
+        run: terraform test -no-color
+      - name: Local Python fixtures
+        if: matrix.root == 'terraform'
+        run: |
+          python3 -m pip install PyYAML
+          roots=(
+            terraform terraform-erpnext
+            terraform-erpbridge terraform-uptime
+          )
+          for root in "${roots[@]}"; do
+            terraform -chdir="$root" init -backend=false -input=false \
+              -lockfile=readonly
+          done
+          python3 -m unittest discover -s tests -v
+      - name: Shell syntax
+        if: matrix.root == 'terraform'
+        run: |
+          for file in scripts/*.sh demo/erpnext/*.sh demo/erpbridge/*.sh; do
+            bash -n "$file"
+          done
