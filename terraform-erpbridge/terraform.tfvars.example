@@ -1,0 +1,39 @@
+# Copy to a protected local tfvars file only after checking ignore rules.
+# This independent root creates only the dedicated ERPBridge VM, its network,
+# its OS disk, and its private backup storage. It manages no DNS record and no
+# existing resource.
+# Authenticate Azure with the operator's existing CLI/environment setup.
+# Never place a credential, token, password, or private key in this file.
+subscription_id = "00000000-0000-0000-0000-000000000000"
+tenant_id       = "00000000-0000-0000-0000-000000000000"
+
+resource_group_name = "erpbridge-hq"  # Looked up, never created or deleted here.
+deployment_location = "centralindia"  # Independent of the resource group location.
+vm_name             = "erpbridge-vm"
+vm_size             = "Standard_B2ats_v2" # Change only with a separate priced approval.
+os_disk_name        = "erpbridge-vm-osdisk"
+os_disk_size_gb     = 32 # Must stay at or above the reviewed 32 GiB Standard SSD tier.
+
+ssh_username         = "erpbridge"
+ssh_public_key_path  = "~/.ssh/erpbridge-vm.pub"
+ssh_private_key_path = "~/.ssh/erpbridge-vm" # Path string only, never read by Terraform.
+operator_ssh_cidr    = "203.0.113.10/32"     # Replace with your actual operator IPv4 /32.
+
+canonical_url          = "https://erpbridge.nimendra.online"
+backup_storage_account_name = "erpbridgebackups" # Must be globally unique; confirm first.
+backup_container_name       = "erpbridge-backups"
+backup_retention_days       = 7
+
+# The backup account disables shared-key access, so the operator identity that
+# runs plan/apply needs the Storage Blob Data Contributor role on that account
+# (or on the container) to manage the blob container through Microsoft Entra.
+# Review cost, quota, the exact VM size, and a saved plan before any apply.
+
+# Optional monitoring is disabled by default. Import the existing action group
+# and VM availability rule before an enabled apply. Reuse AMA, never add an agent.
+monitoring_enabled                      = false
+monitoring_existing_resources_confirmed = false
+# Supply monitoring_email_receiver privately using the existing receiver name,
+# email_address and group_short_name. Never put recipient PII in this example.
+# Set true immediately after fresh ingestion and actual KQL validation.
+monitoring_guest_alert_enabled = false

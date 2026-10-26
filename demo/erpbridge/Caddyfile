@@ -1,0 +1,22 @@
+# Normal serving configuration for the ERPBridge VM.
+#
+# Caddy terminates TLS and forwards every non-root path to the server on
+# localhost. It adds no authentication, no rewriting, and no access logging, so
+# bearer tokens and query credentials cannot leak into a proxy log.
+#
+# The exact root path returns a small public page. It is not a health check:
+# backend readiness is read from /mcp/health, which is proxied like any other
+# API path.
+erpbridge.nimendra.online {
+	handle / {
+		header Content-Type "text/html; charset=utf-8"
+		respond "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>ERPBridge API service</title></head><body><h1>ERPBridge API service</h1><p>Use an authorized MCP client.</p><p><a href='https://toolplane.nimendra.online/'>ToolPlane documentation</a></p></body></html>" 200
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:8080 {
+			# Stream responses instead of buffering them.
+			flush_interval -1
+		}
+	}
+}

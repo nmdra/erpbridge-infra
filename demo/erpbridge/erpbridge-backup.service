@@ -1,0 +1,20 @@
+[Unit]
+Description=ERPBridge registry backup
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# The storage endpoint is deployment-specific and is not a secret, so it is
+# written once at bootstrap. Without it the tool would fall back to a
+# hardcoded account name that does not exist, and every run would fail.
+EnvironmentFile=/etc/erpbridge/backup.env
+# Reads the live database with the SQLite backup API and uploads the verified
+# copy. It never writes to the registry and never restores one.
+ExecStart=/usr/bin/python3 /opt/erpbridge/backup.py
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+NoNewPrivileges=yes
+ProtectHome=yes
+PrivateTmp=yes

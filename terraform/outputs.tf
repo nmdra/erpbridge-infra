@@ -3,13 +3,19 @@ output "deployment_summary" {
   value = {
     resource_group = data.azurerm_resource_group.existing.name
     location       = local.location
+    erp_target     = var.erp_target
+    erpnext        = var.erpnext_url == null ? null : { url = var.erpnext_url }
 
     erpbridge = {
-      name      = azurerm_container_app.erpbridge.name
-      url       = local.erpbridge_url
-      azure_url = local.erpbridge_azure_url
-      mcp_url   = "${local.erpbridge_url}/mcp/"
-      port      = var.erpbridge_mcp_port
+      name            = azurerm_container_app.erpbridge.name
+      url             = local.erpbridge_url
+      azure_url       = local.erpbridge_azure_url
+      mcp_url         = "${local.erpbridge_url}/mcp/"
+      port            = var.erpbridge_mcp_port
+      hosting         = var.erpbridge_hosting
+      source_fenced   = var.erpbridge_source_fenced
+      min_replicas    = var.erpbridge_min_replicas
+      dns_record_type = local.erpbridge_dns_type
     }
 
     mockerp = {
@@ -22,6 +28,16 @@ output "deployment_summary" {
 
     custom_domains_enabled = var.custom_domains != null
   }
+}
+
+output "erp_target" {
+  description = "Selected upstream ERP target."
+  value       = var.erp_target
+}
+
+output "erpnext_url" {
+  description = "Configured ERPNext HTTPS origin, or null when not configured."
+  value       = var.erpnext_url
 }
 
 output "erpbridge_url" {
@@ -47,6 +63,18 @@ output "erpbridge_azure_url" {
 output "mockerp_azure_url" {
   description = "Azure-generated MockERP URL for diagnostics and fallback."
   value       = local.mockerp_azure_url
+}
+
+output "erpbridge_hosting" {
+  description = "ERPBridge hosting ownership, the fence state, and the bridge DNS record shape."
+  value = {
+    hosting             = var.erpbridge_hosting
+    source_fenced       = var.erpbridge_source_fenced
+    canonical_hostname  = var.custom_domains == null ? null : trimspace(lower(var.custom_domains.erpbridge))
+    dns_record_type     = local.erpbridge_dns_type
+    dns_record_content  = var.custom_domains == null ? null : local.erpbridge_dns_content
+    cname_check_applies = local.erpbridge_verify_cname
+  }
 }
 
 output "cloudflare_domains" {

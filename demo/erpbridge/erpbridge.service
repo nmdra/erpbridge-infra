@@ -1,0 +1,44 @@
+[Unit]
+Description=ERPBridge server container
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+# Never loop tightly when the startup guard refuses to run.
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+# Non-secret service wiring only: image reference, paths, and port. Application
+# settings and credentials come from the protected env file, which is passed to
+# Docker by path and never appears in the process arguments. Values are quoted
+# so systemd never splits them.
+EnvironmentFile=/etc/erpbridge/service.env
+# The guard checks storage identity, the database, and the secret file before
+# anything starts. It exits non-zero to block startup.
+ExecStartPre=/opt/erpbridge/require-database.sh
+ExecStart=/usr/bin/docker run --rm \
+    --name erpbridge \
+    --env-file /etc/erpbridge/runtime.env \
+    --publish "127.0.0.1:${ERPBRIDGE_MCP_PORT}:${ERPBRIDGE_MCP_PORT}" \
+    --volume "${ERPBRIDGE_DATA_DIR}:/data" \
+    --log-driver json-file \
+    --log-opt max-size=10m \
+    --log-opt max-file=3 \
+    --stop-timeout 30 \
+    "${ERPBRIDGE_IMAGE}"
+ExecStop=/usr/bin/docker stop --time 30 erpbridge
+TimeoutStopSec=90
+Restart=on-failure
+RestartSec=10
+# Root is required only to talk to the Docker daemon. The container runs as its
+# own non-root image user, mounts no Docker socket, and is never privileged.
+# No filesystem protection directive is set here on purpose: this unit runs the
+# Docker client, and unverified sandboxing around it risks breaking container
+# creation. The container itself is the isolation boundary.
+NoNewPrivileges=yes
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

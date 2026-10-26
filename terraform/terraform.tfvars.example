@@ -12,10 +12,17 @@ mockerp_image   = "ghcr.io/nmdra/mockerp@sha256:67a25057cbb2a3c4422be8e97b8a3096
 # Existing Cloudflare zone. Records remain DNS-only for Azure certificate validation.
 # Set to null to disable custom domains.
 custom_domains = {
-  zone_id   = "00000000000000000000000000000000"
-  erpbridge = "erpbridge.example.com"
-  mockerp   = "mockerp.example.com"
+  zone_id   = "c68ea0eb14e403a5454c04b6efecdcf2"
+  erpbridge = "erpbridge.nimendra.online"
+  mockerp   = "mockerp.nimendra.online"
 }
+
+# Backward-compatible default. Select erpnext only after its deployment and
+# bounded tool cutover are ready. Supply TF_VAR_erpnext_api_token privately.
+erp_target = "mockerp"
+# erp_target = "erpnext"
+# erpnext_url = "https://erpnext.nimendra.online"
+# Leave erpbridge_erp_base_url unset; the selected target determines its URL.
 
 # Public IPv4 CIDR for the local Postman client.
 mockerp_allowed_cidrs       = ["203.0.113.10/32"]
@@ -25,7 +32,11 @@ mockerp_allow_all_ingress   = false
 mockerp_aca_internal_cidrs = ["100.100.0.0/16"]
 
 # Do not commit real values. Set these through TF_VAR_* instead.
-# api_auth_token = ""
+# api_auth_token      = ""
+# Optional integrations default to null and are omitted when unset.
+# policy_gate_api_key       = null
+# external_service_api_key = null
+# resend_api_key            = null
 # mockerp_credentials = {
 #   credentials = [{
 #     api_key    = "example-key"

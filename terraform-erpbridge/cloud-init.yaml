@@ -1,0 +1,59 @@
+#cloud-config
+# Bootstrap for the dedicated ERPBridge VM: Ubuntu archive packages and host SSH
+# hardening only. This file contains no credential, pulls no image, and starts
+# no application. The runtime stack, its Caddyfile, its systemd unit, and its
+# protected environment file (mode 0600) are transferred separately by the
+# operator after this instance is reachable.
+package_update: true
+package_upgrade: false
+
+# Key-only SSH. Password authentication is also disabled in the image config.
+ssh_pwauth: false
+
+packages:
+  - ca-certificates
+  - docker.io
+  - docker-compose-v2
+  - caddy
+  # sqlite3 is required by the startup guard, which refuses to start the server
+  # if it cannot verify the database. python3 runs the backup and restore
+  # tooling on this host.
+  - sqlite3
+  - python3
+
+write_files:
+  # sshd_config includes this drop-in directory at the top of the file and uses
+  # the first value for each keyword, so a low sort prefix wins over the
+  # distribution cloud-init drop-in.
+  - path: /etc/ssh/sshd_config.d/10-erpbridge-hardening.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PubkeyAuthentication yes
+      PermitRootLogin prohibit-password
+      X11Forwarding no
+      AllowAgentForwarding no
+      MaxAuthTries 4
+      LoginGraceTime 30
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+
+  # Unattended security upgrades for this Internet-facing host.
+  - path: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root:root
+    permissions: "0644"
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      APT::Periodic::AutocleanInterval "7";
+
+runcmd:
+  - [systemctl, enable, --now, docker]
+  - [systemctl, enable, --now, unattended-upgrades]
+  - [sshd, -t]
+  - [systemctl, reload, ssh]
+  # The runtime bootstrap installs the Caddyfile and enables the proxy. Until
+  # then, do not serve the distribution's default HTTP site.
+  - [systemctl, disable, --now, caddy]

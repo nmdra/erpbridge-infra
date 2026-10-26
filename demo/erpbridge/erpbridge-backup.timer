@@ -1,0 +1,14 @@
+[Unit]
+Description=Daily ERPBridge registry backup
+
+[Timer]
+OnCalendar=daily
+# Spread the start so the backup does not always run at midnight.
+RandomizedDelaySec=15m
+AccuracySec=15m
+# Run once after a missed window, for example when the VM was off.
+Persistent=true
+Unit=erpbridge-backup.service
+
+[Install]
+WantedBy=timers.target

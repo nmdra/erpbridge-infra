@@ -1,0 +1,9 @@
+# Maintenance configuration for the ERPBridge VM.
+#
+# Installed before the first restore and used whenever the migration is in
+# progress. Every path, including /mcp/ and /mcp/health, returns 503 so no API
+# call can be mistaken for a working service and no readiness check can pass.
+erpbridge.nimendra.online {
+	header Content-Type "text/html; charset=utf-8"
+	respond "<!doctype html><html lang='en'><head><meta charset='utf-8'><title>ERPBridge maintenance</title></head><body><h1>ERPBridge is temporarily unavailable</h1><p>A scheduled migration is in progress. Try again shortly.</p></body></html>" 503
+}

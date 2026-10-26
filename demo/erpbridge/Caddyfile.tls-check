@@ -1,0 +1,13 @@
+# Temporary certificate-check configuration for the ERPBridge VM.
+#
+# Used before DNS cutover, when the canonical hostname still resolves to the
+# Container App. Caddy serves the operator-supplied certificate so the correct
+# certificate can be proven, while every path returns 503 so no API call is
+# served and no readiness check can pass. The normal configuration replaces this
+# file once the record points at this VM and automatic issuance is verified.
+erpbridge.nimendra.online {
+	tls /etc/caddy/certs/erpbridge.crt /etc/caddy/certs/erpbridge.key
+
+	header Content-Type "text/html; charset=utf-8"
+	respond "<!doctype html><html lang='en'><head><meta charset='utf-8'><title>ERPBridge migration</title></head><body><h1>ERPBridge is being prepared</h1><p>This host is serving a pre-migration TLS check. No API is available yet.</p></body></html>" 503
+}
