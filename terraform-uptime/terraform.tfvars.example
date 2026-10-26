@@ -1,0 +1,13 @@
+# Copy outside the repository to a protected file (mode 0600). No real secrets here.
+subscription_id = "00000000-0000-0000-0000-000000000001"
+tenant_id       = "00000000-0000-0000-0000-000000000002"
+# Existing resource group and Container Apps environment use the root defaults.
+publish                 = false
+accept_reset_setup_risk  = false
+enable_custom_domain    = false
+# To publish the new hostname, set all three booleans above to true and supply:
+# cloudflare_zone_id = "approved-zone-id"
+# Cloudflare provider reads CLOUDFLARE_API_TOKEN from a protected environment.
+# Kuma uses its own login. No Entra or reset guard is installed.
+# Disposable database loss erases state and reopens public first-user setup:
+# anyone can claim administrator access. Publication requires explicit acceptance.

@@ -1,0 +1,14 @@
+{
+  "excluded_paths": [
+    "/",
+    "/status/erpbridge",
+    "/api/entry-page",
+    "/api/status-page/erpbridge",
+    "/api/status-page/heartbeat/erpbridge",
+    "/api/status-page/erpbridge/manifest.json",
+    "/api/status-page/erpbridge/incident-history",
+    "/assets/*",
+    "/icon.svg",
+    "/favicon.ico"
+  ]
+}
